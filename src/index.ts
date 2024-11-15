@@ -6,10 +6,11 @@ const { QuestionManager } = require('puregram-question');
 
 
 import prisma from './module/prisma';
-import { User_Registration } from './module/registration';
+import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data, User_Registration } from './module/registration';
 import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
+import { Logger } from './module/helper';
 
 
 dotenv.config();
@@ -27,7 +28,7 @@ commandUserRoutes(hearManager)
 
 telegram.updates.on('message', async (context: MessageContext) => {
     // Проверяем, является ли сообщение текстовым
-    console.log(context)
+    //console.log(context)
     
 	//await vk.api.messages.send({ peer_id: 463031671, random_id: 0, message: `тест2`, attachment: `photo200840769_457273112` } )
 	//Модуль вызова пкметра
@@ -44,23 +45,34 @@ telegram.updates.on('message', async (context: MessageContext) => {
 });
 
 // Обработка нажатий на инлайн-кнопки
-telegram.updates.on('callback_query', async (context: CallbackQueryContext) => {
-    console.log(context)
-    const { queryPayload, message } = context;
+telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
+    
+    //console.log(context)
+    const { queryPayload, message } = query;
 
     if (!message || !message.from) {
         return; // Игнорируем, если сообщение или чат отсутствуют
     }
-
-    // Обработка нажатий на кнопки
-    if (queryPayload === 'success_processing_of_personal_data') {
-        await telegram.api.sendMessage({ chat_id: message.chat.id, text: 'Вы согласны на обработку персональных данных.' });
-    } else if (queryPayload === 'denied_processing_of_personal_data') {
-        await telegram.api.sendMessage({ chat_id: message.chat.id, text: 'Вы не согласны на обработку персональных данных.' });
+    
+    const config: Record<string, Function> = {
+        "success_processing_of_personal_data": Success_Processing_Of_Personal_Data,
+        "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data,
+    };
+    
+    const command: string | any = queryPayload;
+    if (typeof command != 'string') { return }
+    
+    if (config.hasOwnProperty(command)) {
+        try {
+            await config[command](message);
+        } catch (e) {
+            await Logger(`Error event detected for command '${command}': ${e}`);
+        }
+    } else {
+        await Logger(`Unknown command: '${command}'`);
     }
-
     // Подтверждаем нажатие кнопки
-    await telegram.api.answerCallbackQuery(context.id);
+    //await telegram.api.answerCallbackQuery(query.chatInstance);
 });
 
 // Запускаем сервер Telegram

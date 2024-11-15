@@ -1,17 +1,19 @@
 import { Context, Markup } from "telegraf";
 import prisma from "./prisma";
 import { InlineKeyboard, KeyboardBuilder, MessageContext } from "puregram";
+import { telegram } from "..";
+import { Logger, Send_Message } from "./helper";
 //import { Keyboard_Index, Logger, Send_Message, User_Info } from "./helper";
 
 export async function User_Registration(context: MessageContext) {
     const keyboard = InlineKeyboard.keyboard([
         [ // first row
           InlineKeyboard.textButton({ // first row, first button
-            text: '✏ Ок', payload: 'success_processing_of_personal_data'
+            text: '✏', payload: 'success_processing_of_personal_data'
           }),
       
           InlineKeyboard.textButton({ // first row, second button
-            text: '👣 Не ок', payload: 'denied_processing_of_personal_data'
+            text: '👣', payload: 'denied_processing_of_personal_data'
           })
         ]
       ])
@@ -51,6 +53,25 @@ export async function User_Registration(context: MessageContext) {
         .urlButton({ label: '⚡ Инструкция', url: `https://vk.com/@bank_mm-instrukciya-po-polzovaniu-botom-centrobanka-magomira` }).row().inline(),
         answerTimeLimit
     })*/
+    //const ans_selector = `⁉ @id${save.idvk}(${info.first_name}) легально регистрируется в Спутнике под GUID: ${save.id}!`
+    //await Send_Message(chat_id, ans_selector)
+    //await Keyboard_Index(context, `💡 Подсказка: Базовая команда [!спутник] без квадратных скобочек!`)
+}
+
+export async function Denied_Processing_Of_Personal_Data(message: MessageContext) {
+    const save_check = await prisma.account.findFirst({ where: { idvk: message.chat.id }})
+    if (save_check) { return }
+    await Send_Message(message, '⌛ Вы отказались дать свое согласие. Если что, заглядывайте на чай');
+}
+
+export async function Success_Processing_Of_Personal_Data(message: MessageContext) {
+    const save_check = await prisma.account.findFirst({ where: { idvk: message.chat.id }})
+    if (save_check) { return }
+    await Send_Message(message, '⌛ Поставив свою подпись, вы увидели Хранителя Спутника, который что-то писал на листке пергамента.');
+    
+    const save = await prisma.account.create({	data: {	idvk: message.chat.id } })
+    await Send_Message(message, `⌛ Хранитель вас увидел и сказал:\n — Добро пожаловать в Распутник! \n ⚖Вы зарегистрировались в системе, ${message.chat.firstName}\n 🕯 GUID: ${save.id}. \n 🎥 idtg: ${save.idvk}\n ⚰ Дата Регистрации: ${save.crdate}\n`)
+    await Logger(`In database created new user with uid [${save.id}] and idtg [${save.idvk}]`)
     //const ans_selector = `⁉ @id${save.idvk}(${info.first_name}) легально регистрируется в Спутнике под GUID: ${save.id}!`
     //await Send_Message(chat_id, ans_selector)
     //await Keyboard_Index(context, `💡 Подсказка: Базовая команда [!спутник] без квадратных скобочек!`)
