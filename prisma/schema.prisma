@@ -1,0 +1,69 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id       Int      @id @default(autoincrement())
+  idvk     Int
+  id_role  Int      @default(1)
+  censored Boolean  @default(true)
+  banned   Boolean  @default(false)
+  donate   Boolean  @default(false)
+  crdate   DateTime @default(now())
+  online   DateTime @default(now())
+  Blank    Blank[]
+  Vision   Vision[]
+  Report   Report[]
+  BlackList BlackList[]
+}
+model BlackList {
+  id       Int      @id @default(autoincrement())
+  idvk     Int
+  id_account Int
+  account    Account  @relation(fields: [id_account], references: [id], onDelete: Cascade)
+}
+
+model Blank {
+  id         Int      @id @default(autoincrement())
+  text       String
+  photo      String   @default("")
+  id_account Int
+  account    Account  @relation(fields: [id_account], references: [id], onDelete: Cascade)
+  banned     Boolean  @default(false)
+  crdate     DateTime @default(now())
+  Vision     Vision[]
+  Report     Report[]
+}
+
+model Vision {
+  id         Int     @id @default(autoincrement())
+  id_account Int
+  account    Account @relation(fields: [id_account], references: [id], onDelete: Cascade)
+  id_blank   Int
+  blank      Blank   @relation(fields: [id_blank], references: [id], onDelete: Cascade)
+}
+
+model Mail {
+  id         Int     @id @default(autoincrement())
+  blank_to   Int
+  blank_from Int
+  read       Boolean @default(false)
+  status     Boolean @default(false)
+  find       Boolean @default(true)
+}
+
+model Report {
+  id         Int     @id @default(autoincrement())
+  text       String
+  id_blank   Int
+  blank      Blank   @relation(fields: [id_blank], references: [id], onDelete: Cascade)
+  id_account Int
+  account    Account @relation(fields: [id_account], references: [id], onDelete: Cascade)
+  status     String  @default("wait")
+}
