@@ -1,5 +1,7 @@
 import { MessageContext } from "puregram";
 import { telegram } from "..";
+import { Account } from "@prisma/client";
+import prisma from "./prisma";
 
 export async function Logger(text: String) {
     const project_name = `Sputnik TG`
@@ -25,4 +27,16 @@ export async function Send_Message(message: MessageContext, text: string, keyboa
     } catch (e) {
         console.log(`Ошибка отправки сообщения: ${e}`)
     }
+}
+
+export async function Accessed(context: any) {
+    const user: Account | null | undefined = await prisma.account.findFirst({ where: { idvk: context.senderId } })
+    if (!user) { return }
+    const config: any = {
+        "1": `user`,
+        "2": `admin`,
+        "3": `root`
+    }
+    const role = config[user.id_role.toString()]
+    return role
 }

@@ -1,8 +1,8 @@
 import { Context, Markup } from "telegraf";
-import prisma from "./prisma";
+import prisma from "../prisma";
 import { InlineKeyboard, KeyboardBuilder, MessageContext } from "puregram";
-import { telegram } from "..";
-import { Logger, Send_Message } from "./helper";
+import { telegram } from "../..";
+import { Logger, Send_Message } from "../helper";
 //import { Keyboard_Index, Logger, Send_Message, User_Info } from "./helper";
 
 export async function User_Registration(context: MessageContext) {
@@ -16,7 +16,7 @@ export async function User_Registration(context: MessageContext) {
             text: '👣', payload: 'denied_processing_of_personal_data'
           })
         ]
-      ])
+    ])
     // Согласие на обработку
     await context.send(`
         ⚠ Что вам следует знать о Спутнике: 

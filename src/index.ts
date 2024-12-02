@@ -6,11 +6,14 @@ const { QuestionManager } = require('puregram-question');
 
 
 import prisma from './module/prisma';
-import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data, User_Registration } from './module/registration';
+import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data, User_Registration } from './module/account/registration';
 import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Logger } from './module/helper';
+import { Sub_Menu } from './module/menu/sub';
+import { Main_Menu } from './module/menu/main';
+import { Blank_Self } from './module/account/blank';
 
 
 dotenv.config();
@@ -55,8 +58,11 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     }
     
     const config: Record<string, Function> = {
-        "success_processing_of_personal_data": Success_Processing_Of_Personal_Data,
-        "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data,
+        "success_processing_of_personal_data": Success_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Принятие
+        "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
+        'main_menu': Main_Menu, // 0 Меню
+        'sub_menu': Sub_Menu, // 0 Подменю
+        'blank_self': Blank_Self // 2 Анкета
     };
     
     const command: string | any = queryPayload;
@@ -65,6 +71,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     if (config.hasOwnProperty(command)) {
         try {
             await config[command](message);
+            await message.editMessageReplyMarkup({ inline_keyboard: [] });
         } catch (e) {
             await Logger(`Error event detected for command '${command}': ${e}`);
         }
