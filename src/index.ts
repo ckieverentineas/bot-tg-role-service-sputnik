@@ -13,7 +13,9 @@ import { commandUserRoutes } from './command';
 import { Logger } from './module/helper';
 import { Sub_Menu } from './module/menu/sub';
 import { Main_Menu } from './module/menu/main';
-import { Blank_Self } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Self } from './module/account/blank';
+import { Counter_PK_Module } from './module/other/pk_metr';
+import { Input_Module } from './module/other/input';
 
 
 dotenv.config();
@@ -29,15 +31,21 @@ const hearManager = new HearManager()
 telegram.updates.on('message', hearManager.middleware)
 commandUserRoutes(hearManager)
 
+// хранилище для пкметра и режимов
+export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string }> = []
+
 telegram.updates.on('message', async (context: MessageContext) => {
     // Проверяем, является ли сообщение текстовым
     //console.log(context)
     
 	//await vk.api.messages.send({ peer_id: 463031671, random_id: 0, message: `тест2`, attachment: `photo200840769_457273112` } )
 	//Модуль вызова пкметра
-	//const pk_counter_st = await Counter_PK_Module(context)
+	const pk_counter_st = await Counter_PK_Module(context)
 	//console.log(users_pk)
-	//if (pk_counter_st) { return }
+	if (pk_counter_st) { return }
+    const input_st = await Input_Module(context)
+	//console.log(users_pk)
+	if (input_st) { return }
 	//проверяем есть ли пользователь в базах данных
 	const user_check = await prisma.account.findFirst({ where: { idvk: context.from?.id } })
 	//если пользователя нет, то начинаем регистрацию
@@ -62,7 +70,9 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
         'main_menu': Main_Menu, // 0 Меню
         'sub_menu': Sub_Menu, // 0 Подменю
-        'blank_self': Blank_Self // 2 Анкета
+        'blank_self': Blank_Self, // 2 Анкета Главная
+        'blank_create': Blank_Create, // 2 Анкета Подтверждение создания
+        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON // 2 Анкета активация режима ввода
     };
     
     const command: string | any = queryPayload;
@@ -71,7 +81,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     if (config.hasOwnProperty(command)) {
         try {
             await config[command](message);
-            await message.editMessageReplyMarkup({ inline_keyboard: [] });
+            //await message.editMessageReplyMarkup({ inline_keyboard: [] });
         } catch (e) {
             await Logger(`Error event detected for command '${command}': ${e}`);
         }

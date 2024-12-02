@@ -30,7 +30,7 @@ export async function Send_Message(message: MessageContext, text: string, keyboa
 }
 
 export async function Accessed(context: any) {
-    const user: Account | null | undefined = await prisma.account.findFirst({ where: { idvk: context.senderId } })
+    const user: Account | null | undefined = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user) { return }
     const config: any = {
         "1": `user`,
@@ -39,4 +39,11 @@ export async function Accessed(context: any) {
     }
     const role = config[user.id_role.toString()]
     return role
+}
+
+export async function User_Banned(context: any) {
+    const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user) { return false }
+    if (user.banned) { return true }
+    return false
 }
