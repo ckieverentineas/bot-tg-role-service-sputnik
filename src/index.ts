@@ -16,7 +16,7 @@ import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
-import { Random_Research } from './module/reseacher/random';
+import { Blank_Like, Random_Research } from './module/reseacher/random';
 
 
 dotenv.config();
@@ -77,6 +77,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода
         'blank_delete': Blank_Delete, // 2 Анкета Удаление бланка
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
+        'blank_like': Blank_Like // 3 Поиск - Случайный рандом лайкаем анкетку конфетку
     };
     //console.log(query)
     const command: string | any = queryPayload.command;

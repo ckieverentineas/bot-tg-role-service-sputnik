@@ -1,6 +1,6 @@
 import { InlineKeyboard, MessageContext } from "puregram";
 import prisma from "../prisma";
-import { Accessed, Logger, Send_Message, User_Banned } from "../helper";
+import { Accessed, Logger, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
 import { Censored_Activation_Pro } from "../other/censored";
 import { telegram, users_pk } from "../..";
 import { User_Pk_Get, User_Pk_Init } from "../other/pk_metr";
@@ -38,8 +38,8 @@ export async function Random_Research(context: MessageContext) {
     const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = InlineKeyboard.keyboard([
         [ 
-            InlineKeyboard.textButton({ text: '🛠⛔ Налево', payload: { command: 'blank_unlike', id_blank: selector.id } }),
-            InlineKeyboard.textButton({ text: `🛠✅ Направо`, payload: { command: 'blank_like', id_blank: selector.id } })
+            InlineKeyboard.textButton({ text: '🛠⛔ Налево', payload: { command: 'blank_unlike', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } }),
+            InlineKeyboard.textButton({ text: `🛠✅ Направо`, payload: { command: 'blank_like', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } })
         ],
         (await Accessed(context) != `user`) ?
         [
@@ -50,12 +50,22 @@ export async function Random_Research(context: MessageContext) {
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '🛠⚠ Жалоба', payload: { command: 'blank_report', id_blank: selector.id } })
+            InlineKeyboard.textButton({ text: '🛠⚠ Жалоба', payload: { command: 'blank_report', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } })
         ]
     ])
     await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)
 }
 
-async function Blank_Like(context: MessageContext) {
-    
+export async function Blank_Like(context: MessageContext, queryPayload: any) {
+    const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: queryPayload.idb }})
+	//if (!blank_vision_check) { const blank_skip = await prisma.vision.create({ data: { id_account: context.chat.id, id_blank: queryPayload.id_blank } }) }
+    const user_nice = await prisma.account.findFirst({ where: { id: queryPayload.ida } })
+    if (!user_nice) { return }
+    const blank_nice = await prisma.blank.findFirst({ where: { id: queryPayload.idb } })
+    if (!blank_nice) { return }
+	await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла, отправляем информацию об этом его/её владельцу.`)
+	//const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: queryPayload.id_blank_self ?? 0 }})
+	//if (mail_set) { await Send_Message(user_nice?.idvk ?? user_check.idvk, `🔔 Ваша анкета #${selector.id} понравилась кому-то, загляните в почту.`) }
+    await Send_Message_NotSelf(user_nice.idvk, `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то, загляните в почту.`)
+	await Logger(`(private chat) ~ clicked swipe for <blank> #${blank_nice.id} by <user> №${context.chat.id}`)
 }
