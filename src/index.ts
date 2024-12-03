@@ -13,7 +13,7 @@ import { commandUserRoutes } from './command';
 import { Logger } from './module/helper';
 import { Sub_Menu } from './module/menu/sub';
 import { Main_Menu } from './module/menu/main';
-import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Self } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 
@@ -72,7 +72,8 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'sub_menu': Sub_Menu, // 0 Подменю
         'blank_self': Blank_Self, // 2 Анкета Главная
         'blank_create': Blank_Create, // 2 Анкета Подтверждение создания
-        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON // 2 Анкета активация режима ввода
+        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода
+        'blank_delete': Blank_Delete, // 2 Анкета Удаление бланка
     };
     
     const command: string | any = queryPayload;

@@ -88,3 +88,27 @@ export async function Blank_Create_Prefab_Input_ON(context: MessageContext) {
     await Send_Message(context, `📎 Введите анкету нафиг`, /*blank.photo*/)
     await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
 }
+
+export async function Blank_Delete(context: MessageContext) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return }
+	//await Online_Set(context)
+	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    if (blank_check.banned) {
+        await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`)
+        return
+    }
+    const keyboard = InlineKeyboard.keyboard([
+        [
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+        ]
+    ])
+    const blank_delete = await prisma.blank.delete({ where: { id: blank_check.id } })
+    if (blank_delete) { 
+        await Send_Message(context, `✅ Успешно удалено:\n📜 Анкета: ${blank_delete.id}\n💬 Содержание:\n${blank_delete.text}`, keyboard)
+        await Logger(`(private chat) ~ deleted self <blank> #${blank_delete.id} by <user> №${context.senderId}`)
+    }
+}

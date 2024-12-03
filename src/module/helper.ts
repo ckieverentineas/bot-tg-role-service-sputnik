@@ -47,3 +47,11 @@ export async function User_Banned(context: any) {
     if (user.banned) { return true }
     return false
 }
+
+export async function Blank_Cleaner(text: string) {
+	try {
+		return text.replace(/[^а-яА-Я0-9ёЁ \-+—–_•()/\\"'`«»{}[#№\]=:;.,!?...\n\r]/gi, '')
+	} catch {
+		return ' '
+	}
+}
