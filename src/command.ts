@@ -17,28 +17,28 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
     const keyboard = InlineKeyboard.keyboard([
       [ 
-        InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: 'blank_self' }),
-        InlineKeyboard.textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: 'mail_self' })
+        InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { command: 'blank_self' } }),
+        InlineKeyboard.textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { command: 'mail_self' } })
       ],
       [ 
-        InlineKeyboard.textButton({ text: '⚙ Цензура', payload: 'censored_change' }),
-        InlineKeyboard.textButton({ text: '☠ Банхаммер', payload: 'banhammer_self' })
+        InlineKeyboard.textButton({ text: '⚙ Цензура', payload: { command: 'censored_change' } }),
+        InlineKeyboard.textButton({ text: '☠ Банхаммер', payload: { command: 'banhammer_self' } })
       ],
       [
-        InlineKeyboard.textButton({ text: '🌐 Браузер', payload: 'browser_research' }),
-        InlineKeyboard.textButton({ text: '🔍 Поиск', payload: 'basic_research' })
+        InlineKeyboard.textButton({ text: '🌐 Браузер', payload: { command: 'browser_research' } }),
+        InlineKeyboard.textButton({ text: '🔍 Поиск', payload: { command: 'basic_research' } })
       ],
       [
-        InlineKeyboard.textButton({ text: '🎲 Рандом', payload: 'random_research' }),
-        InlineKeyboard.textButton({ text: '📐 Пкметр', payload: 'pkmetr' })
+        InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { command: 'random_research' } }),
+        InlineKeyboard.textButton({ text: '📐 Пкметр', payload: { command: 'pkmetr' } })
       ],
       (user_check.donate || await Accessed(context) != `user`) ?
       [
-        InlineKeyboard.textButton({ text: '🔧 Плагины', payload: 'sub_menu' }),
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: 'exit' })
+        InlineKeyboard.textButton({ text: '🔧 Плагины', payload: { command: 'sub_menu' } }),
+        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { command: 'exit' } })
       ] :
       [
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: 'exit' })
+        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { command: 'exit' } })
       ]
     ])
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
@@ -51,16 +51,16 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     //await Online_Set(context)
     const keyboard = InlineKeyboard.keyboard([
       [ 
-        InlineKeyboard.textButton({ text: '⚰ Архив', payload: 'archive_self' }),
-        InlineKeyboard.textButton({ text: `🎯 Снайпер`, payload: 'sniper_self' })
+        InlineKeyboard.textButton({ text: '⚰ Архив', payload: { command: 'archive_self' } }),
+        InlineKeyboard.textButton({ text: `🎯 Снайпер`, payload: { command: 'sniper_self' } })
       ],
       (await Accessed(context) != `user`) ?
       [
-        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: 'moderation_mode' }),
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: { command: 'moderation_mode' } }),
+        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
       ] :
       [
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
       ]
     ])
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}. Добро пожаловать в меню расширенного функционала!`, keyboard)

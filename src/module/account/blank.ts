@@ -15,14 +15,14 @@ export async function Blank_Self(context: MessageContext) {
     const keyboard = InlineKeyboard.keyboard([
         (blank_check) ?
         [
-          InlineKeyboard.textButton({ text: '⛔ Удалить', payload: 'blank_delete' }),
-          InlineKeyboard.textButton({ text: '✏ Изменить', payload: 'blank_edit' })
+          InlineKeyboard.textButton({ text: '⛔ Удалить', payload: { command: 'blank_delete' } }),
+          InlineKeyboard.textButton({ text: '🛠✏ Изменить', payload: { command: 'blank_edit' } })
         ] :
         [
-          InlineKeyboard.textButton({ text: '➕ Создать', payload: 'blank_create' })
+          InlineKeyboard.textButton({ text: '➕ Создать', payload: { command: 'blank_create' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
         ]
     ])
     let answer = ''
@@ -58,10 +58,10 @@ export async function Blank_Create(context: MessageContext) {
     if (blank_check) { return }
     const keyboard = InlineKeyboard.keyboard([
         [
-            InlineKeyboard.textButton({ text: '✏ Ввести анкету', payload: 'blank_create_prefab_input_on' })
+            InlineKeyboard.textButton({ text: '✏ Ввести анкету', payload: { command: 'blank_create_prefab_input_on' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
         ]
     ])
 	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
@@ -103,7 +103,7 @@ export async function Blank_Delete(context: MessageContext) {
     }
     const keyboard = InlineKeyboard.keyboard([
         [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
         ]
     ])
     const blank_delete = await prisma.blank.delete({ where: { id: blank_check.id } })

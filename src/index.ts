@@ -16,6 +16,7 @@ import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
+import { Random_Research } from './module/reseacher/random';
 
 
 dotenv.config();
@@ -59,7 +60,8 @@ telegram.updates.on('message', async (context: MessageContext) => {
 telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     
     //console.log(context)
-    const { queryPayload, message } = query;
+    const { message }= query;
+    const queryPayload: any = query.queryPayload
 
     if (!message || !message.from) {
         return; // Игнорируем, если сообщение или чат отсутствуют
@@ -74,14 +76,15 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_create': Blank_Create, // 2 Анкета Подтверждение создания
         'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода
         'blank_delete': Blank_Delete, // 2 Анкета Удаление бланка
+        'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
     };
-    
-    const command: string | any = queryPayload;
+    //console.log(query)
+    const command: string | any = queryPayload.command;
     if (typeof command != 'string') { return }
     
     if (config.hasOwnProperty(command)) {
         try {
-            await config[command](message);
+            await config[command](message, queryPayload);
             //await message.editMessageReplyMarkup({ inline_keyboard: [] });
         } catch (e) {
             await Logger(`Error event detected for command '${command}': ${e}`);

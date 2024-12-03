@@ -9,11 +9,11 @@ export async function User_Registration(context: MessageContext) {
     const keyboard = InlineKeyboard.keyboard([
         [ // first row
           InlineKeyboard.textButton({ // first row, first button
-            text: '✏', payload: 'success_processing_of_personal_data'
+            text: '✏', payload: { command: 'success_processing_of_personal_data' }
           }),
       
           InlineKeyboard.textButton({ // first row, second button
-            text: '👣', payload: 'denied_processing_of_personal_data'
+            text: '👣', payload: { command: 'denied_processing_of_personal_data' }
           })
         ]
     ])

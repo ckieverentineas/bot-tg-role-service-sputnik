@@ -8,16 +8,16 @@ export async function Sub_Menu(context: MessageContext) {
     //await Online_Set(context)
     const keyboard = InlineKeyboard.keyboard([
       [ 
-        InlineKeyboard.textButton({ text: '⚰ Архив', payload: 'archive_self' }),
-        InlineKeyboard.textButton({ text: `🎯 Снайпер`, payload: 'sniper_self' })
+        InlineKeyboard.textButton({ text: '⚰ Архив', payload: { command: 'archive_self' } }),
+        InlineKeyboard.textButton({ text: `🎯 Снайпер`, payload: { command: 'sniper_self' } })
       ],
       (await Accessed(context) != `user`) ?
       [
-        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: 'moderation_mode' }),
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: { command: 'moderation_mode' } }),
+        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
       ] :
       [
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: 'main_menu' })
+        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
       ]
     ])
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}. Добро пожаловать в меню расширенного функционала!`, keyboard)
