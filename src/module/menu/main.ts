@@ -10,28 +10,28 @@ export async function Main_Menu(context: MessageContext) {
     const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
     const keyboard = InlineKeyboard.keyboard([
       [ 
-        InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { command: 'blank_self' } }),
-        InlineKeyboard.textButton({ text: `🛠${mail_check ? '📬' : '📪'} Почта`, payload: { command: 'mail_self' } })
+        InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
+        InlineKeyboard.textButton({ text: `🛠${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } })
       ],
       [ 
-        InlineKeyboard.textButton({ text: '🛠⚙ Цензура', payload: { command: 'censored_change' } }),
-        InlineKeyboard.textButton({ text: '🛠☠ Банхаммер', payload: { command: 'banhammer_self' } })
+        InlineKeyboard.textButton({ text: '🛠⚙ Цензура', payload: { cmd: 'censored_change' } }),
+        InlineKeyboard.textButton({ text: '🛠☠ Банхаммер', payload: { cmd: 'banhammer_self' } })
       ],
       [
-        InlineKeyboard.textButton({ text: '🛠🌐 Браузер', payload: { command: 'browser_research' } }),
-        InlineKeyboard.textButton({ text: '🛠🔍 Поиск', payload: { command: 'basic_research' } })
+        InlineKeyboard.textButton({ text: '🛠🌐 Браузер', payload: { cmd: 'browser_research' } }),
+        InlineKeyboard.textButton({ text: '🛠🔍 Поиск', payload: { cmd: 'basic_research' } })
       ],
       [
-        InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { command: 'random_research' } }),
-        InlineKeyboard.textButton({ text: '🛠📐 Пкметр', payload: { command: 'pkmetr' } })
+        InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } }),
+        InlineKeyboard.textButton({ text: '🛠📐 Пкметр', payload: { cmd: 'pkmetr' } })
       ],
       (user_check.donate || await Accessed(context) != `user`) ?
       [
-        InlineKeyboard.textButton({ text: '🛠🔧 Плагины', payload: { command: 'sub_menu' } }),
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { command: 'exit' } })
+        InlineKeyboard.textButton({ text: '🛠🔧 Плагины', payload: { cmd: 'sub_menu' } }),
+        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } })
       ] :
       [
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { command: 'exit' } })
+        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } })
       ]
     ])
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)

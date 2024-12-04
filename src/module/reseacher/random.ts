@@ -38,19 +38,19 @@ export async function Random_Research(context: MessageContext) {
     const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = InlineKeyboard.keyboard([
         [ 
-            InlineKeyboard.textButton({ text: '🛠⛔ Налево', payload: { command: 'blank_unlike', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } }),
-            InlineKeyboard.textButton({ text: `🛠✅ Направо`, payload: { command: 'blank_like', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } })
+            InlineKeyboard.textButton({ text: '🛠⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } }),
+            InlineKeyboard.textButton({ text: `🛠✅ Направо`, payload: { cmd: 'blank_like', idb: 999999, idbs: 999999, ida: 999999 } })
         ],
         (await Accessed(context) != `user`) ?
         [
-            InlineKeyboard.textButton({ text: '🛠🚫 Назад', payload: { command: 'main_menu' } }),
-            InlineKeyboard.textButton({ text: '🛠✏ Направо', payload: { command: 'blank_like_donation' } })
+            InlineKeyboard.textButton({ text: '🛠🚫 Назад', payload: { cmd: 'main_menu' } }),
+            InlineKeyboard.textButton({ text: '🛠✏ Направо', payload: { cmd: 'blank_like_donation' } })
         ] :
         [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '🛠⚠ Жалоба', payload: { command: 'blank_report', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } })
+            InlineKeyboard.textButton({ text: '🛠⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id, idbs: blank_check.id, ida: selector.id_account } })
         ]
     ])
     await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)

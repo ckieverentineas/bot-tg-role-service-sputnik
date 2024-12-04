@@ -9,11 +9,11 @@ export async function User_Registration(context: MessageContext) {
     const keyboard = InlineKeyboard.keyboard([
         [ // first row
           InlineKeyboard.textButton({ // first row, first button
-            text: '✏', payload: { command: 'success_processing_of_personal_data' }
+            text: '✏', payload: { cmd: 'success_processing_of_personal_data' }
           }),
       
           InlineKeyboard.textButton({ // first row, second button
-            text: '👣', payload: { command: 'denied_processing_of_personal_data' }
+            text: '👣', payload: { cmd: 'denied_processing_of_personal_data' }
           })
         ]
     ])
@@ -38,8 +38,8 @@ export async function User_Registration(context: MessageContext) {
     const visit: any = await context.question(`⌛ Поставив свою подпись, вы увидели Хранителя Спутника, который что-то писал на листке пергамента.`,
         { 	
             keyboard: Keyboard.builder()
-            .textButton({ label: '🖐 Подойти и поздороваться', payload: { command: 'Согласиться' }, color: 'positive' }).row()
-            .textButton({ label: '⏰ Ждать, пока Хранитель закончит', payload: { command: 'Отказаться' }, color: 'negative' }).oneTime().inline(),
+            .textButton({ label: '🖐 Подойти и поздороваться', payload: { cmd: 'Согласиться' }, color: 'positive' }).row()
+            .textButton({ label: '⏰ Ждать, пока Хранитель закончит', payload: { cmd: 'Отказаться' }, color: 'negative' }).oneTime().inline(),
             answerTimeLimit
         }
     );

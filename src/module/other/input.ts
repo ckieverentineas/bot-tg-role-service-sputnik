@@ -55,8 +55,8 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     const save = await prisma.blank.create({ data: { text: text_input, id_account: user_check.id } })
     const keyboard = InlineKeyboard.keyboard([
         [ 
-            InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { command: 'blank_self' } }),
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { command: 'main_menu' } })
+            InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
         ]
       ])
 	await Send_Message(context, `🔧 Вы успешно создали анкетку-конфетку под UID: ${save.id}\n${save.text}`, keyboard)
