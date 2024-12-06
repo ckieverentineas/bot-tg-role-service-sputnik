@@ -1,6 +1,6 @@
 
 import * as dotenv from 'dotenv';
-const { Telegram } = require('puregram')
+import { Telegram } from 'puregram';
 
 const { QuestionManager } = require('puregram-question');
 
@@ -17,15 +17,14 @@ import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } 
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Unlike, Random_Research } from './module/reseacher/random';
+import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 
 
 dotenv.config();
 
 // Загрузка из .env, задание параметров
-const token: string = process.env.TELEGRAM_TOKEN || '';
-
-export const telegram = Telegram.fromToken(process.env.TOKEN)
-
+const token: any = process.env.TOKEN;
+export const telegram = Telegram.fromToken(token)
 const questionManager = new QuestionManager();
 //telegram.updates.use(questionManager.middleware);
 const hearManager = new HearManager()
@@ -37,7 +36,7 @@ export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmet
 
 telegram.updates.on('message', async (context: MessageContext) => {
     // Проверяем, является ли сообщение текстовым
-    //console.log(context)
+    console.log(context)
     
 	//await vk.api.messages.send({ peer_id: 463031671, random_id: 0, message: `тест2`, attachment: `photo200840769_457273112` } )
 	//Модуль вызова пкметра
@@ -51,6 +50,8 @@ telegram.updates.on('message', async (context: MessageContext) => {
 	const user_check = await prisma.account.findFirst({ where: { idvk: context.from?.id } })
 	//если пользователя нет, то начинаем регистрацию
 	if (!user_check) { await User_Registration(context); return }
+    const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.from?.username } })
 	//await Online_Set(context)
 	//await Keyboard_Index(context, `⌛ Загрузка, пожалуйста подождите...`)
 	return;
@@ -79,6 +80,9 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,
         'blank_unlike': Blank_Unlike, // 3 Поиск - Случайный рандом дизлайкаем анкетку конфетку
+        'mail_self': Mail_Self, // 4 Почта Главная
+        'mail_like': Mail_Like, // 4 Почта - Лайкаем анкету в почте,
+        'mail_unlike': Mail_Unlike, // 4 Почта - Дизлайкаем анкету в почте
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;

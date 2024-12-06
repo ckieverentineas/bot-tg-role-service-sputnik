@@ -69,7 +69,7 @@ export async function Success_Processing_Of_Personal_Data(message: MessageContex
     if (save_check) { return }
     await Send_Message(message, '⌛ Поставив свою подпись, вы увидели Хранителя Спутника, который что-то писал на листке пергамента.');
     
-    const save = await prisma.account.create({	data: {	idvk: message.chat.id } })
+    const save = await prisma.account.create({	data: {	idvk: message.chat.id, username: message.from?.username } })
     await Send_Message(message, `⌛ Хранитель вас увидел и сказал:\n — Добро пожаловать в Распутник! \n ⚖Вы зарегистрировались в системе, ${message.chat.firstName}\n 🕯 GUID: ${save.id}. \n 🎥 idtg: ${save.idvk}\n ⚰ Дата Регистрации: ${save.crdate}\n`)
     await Logger(`In database created new user with uid [${save.id}] and idtg [${save.idvk}]`)
     //const ans_selector = `⁉ @id${save.idvk}(${info.first_name}) легально регистрируется в Спутнике под GUID: ${save.id}!`

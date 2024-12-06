@@ -11,7 +11,7 @@ export async function Main_Menu(context: MessageContext) {
     const keyboard = InlineKeyboard.keyboard([
       [ 
         InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
-        InlineKeyboard.textButton({ text: `🛠${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } })
+        InlineKeyboard.textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } })
       ],
       [ 
         InlineKeyboard.textButton({ text: '🛠⚙ Цензура', payload: { cmd: 'censored_change' } }),
