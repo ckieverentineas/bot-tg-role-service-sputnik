@@ -10,7 +10,7 @@ datasource db {
 
 model Account {
   id       Int      @id @default(autoincrement())
-  idvk     Int
+  idvk     BigInt
   id_role  Int      @default(1)
   censored Boolean  @default(true)
   banned   Boolean  @default(false)
