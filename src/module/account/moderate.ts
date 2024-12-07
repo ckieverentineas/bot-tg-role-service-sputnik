@@ -25,7 +25,7 @@ export async function Moderate_Self(context: MessageContext) {
 
     for (const report of await prisma.report.findMany({ where: { id_blank: selector.id, status: 'wait' } })) {
         const user = await prisma.account.findFirst({ where: { id: report.id_account } })
-        await Send_Message(context, `🗿 Жалоба от @id${user?.username}(КрысаХ):\n💬 Заявление: ${report.text}\n\n`)
+        await Send_Message(context, `🗿 Жалоба от @${user?.username}(КрысаХ):\n💬 Заявление: ${report.text}\n\n`)
     }
     const user_warned = await prisma.account.findFirst({ where: { id: selector.id_account } })
 	const text = `⚖ Вершится суд над следующей анкетой и ее автором:\n📜 Анкета: ${selector.id}\n👤 Автор: @${user_warned?.username}\n💬 Содержание:\n${selector.text}`

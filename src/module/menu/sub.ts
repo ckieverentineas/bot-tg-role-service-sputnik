@@ -13,7 +13,7 @@ export async function Sub_Menu(context: MessageContext) {
       ],
       (await Accessed(context) != `user`) ?
       [
-        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } }),
+        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderate_self' } }),
         InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
       ] :
       [

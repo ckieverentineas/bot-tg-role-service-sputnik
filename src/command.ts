@@ -1,7 +1,9 @@
 import { HearManager } from "@puregram/hear";
 import { InlineKeyboard, MessageContext } from "puregram";
 import prisma from "./module/prisma";
-import { Accessed, Logger, Send_Message } from "./module/helper";
+import { Accessed, Logger, Send_Message, Send_Message_NotSelf } from "./module/helper";
+import { root } from ".";
+import { Account } from "@prisma/client";
 
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
   hearManager.hear(
@@ -65,5 +67,34 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     ])
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}. Добро пожаловать в меню расширенного функционала!`, keyboard)
     await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+  })
+  hearManager.hear(/!админка/, async (context: any) => {
+    if (context.chat.id == root) {
+      const user:any = await prisma.account.findFirst({ where: { idvk: Number(context.chat.id) } })
+      const lvlup = await prisma.account.update({ where: { id: user.id }, data: { id_role: 2 } })
+      if (lvlup) {
+          await Send_Message(context, `⚙ Рут права получены`)
+          console.log(`Super user ${context.chat.id} got root`)
+      } else {
+          await Send_Message(context, `⚙ Ошибка`)
+      }
+    }
+  })
+  hearManager.hear(/!права/, async (context: MessageContext) => {
+    if (context.chat.id == Number(root) || await Accessed(context) != 'user') {
+      let [ command, target ] = context.text!.split(' ')
+      if (typeof target != 'string') { return }
+      target = target.replace('@', '')
+      const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
+      if (!account_check) { 
+        await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+        return Send_Message(context, `🔧 @${target} не существует`);
+      }
+			//await Online_Set(context)
+      const login = await prisma.account.update({ where: { id: account_check.id }, data: { id_role: account_check.id_role == 1 ? 2 : 1 } })
+      await Send_Message(context, `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
+			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.id_role == 2 ? 'добавлены в лист администраторов' : 'убраны из листа администраторов'}`)
+			await Logger(`(private chat) ~ changed role <${login.id_role == 2 ? 'admin' : 'user'}> for #${login.idvk} by <admin> №${context.chat.id}`)
+    }
   })
 }

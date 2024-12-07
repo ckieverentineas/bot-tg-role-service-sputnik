@@ -133,9 +133,10 @@ export async function Blank_Report_Perfab_Input_ON(context: MessageContext, quer
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
+    const report_check = await prisma.report.findFirst({ where: { id_blank:  queryPayload.idb, id_account: user_check.id }})
+    if (report_check) { return await Send_Message(context, `Вы уже подавали жалобу на анкету ${report_check.id_blank}`)}
     await User_Pk_Init(context)
     const id = await User_Pk_Get(context)
-    
     if (id == null) { return }
     users_pk[id].mode = 'input'
     users_pk[id].operation = 'blank_report_prefab_input_off'

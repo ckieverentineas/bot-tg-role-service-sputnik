@@ -66,7 +66,7 @@ export async function User_Pk_Init(context: any) {
             find_me = true
         }
     }
-    if (!find_me) { users_pk.push({ idvk: context.chat.id, text: ``, mode: 'main', operation: '' } )}
+    if (!find_me) { users_pk.push({ idvk: context.chat.id, text: ``, mode: 'main', operation: '', id_target: null } )}
 }
 
 export async function User_Pk_Get(context: any) {

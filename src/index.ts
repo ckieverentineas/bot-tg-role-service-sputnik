@@ -25,6 +25,7 @@ dotenv.config();
 
 // Загрузка из .env, задание параметров
 const token: any = process.env.TOKEN;
+export const root = process.env.ROOT;
 export const telegram = Telegram.fromToken(token)
 const questionManager = new QuestionManager();
 //telegram.updates.use(questionManager.middleware);
