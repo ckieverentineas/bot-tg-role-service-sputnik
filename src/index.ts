@@ -16,7 +16,7 @@ import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
-import { Blank_Like, Blank_Unlike, Random_Research } from './module/reseacher/random';
+import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 
 
@@ -32,7 +32,7 @@ telegram.updates.on('message', hearManager.middleware)
 commandUserRoutes(hearManager)
 
 // хранилище для пкметра и режимов
-export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string }> = []
+export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string, id_target: number | null }> = []
 
 telegram.updates.on('message', async (context: MessageContext) => {
     // Проверяем, является ли сообщение текстовым
@@ -75,11 +75,13 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'sub_menu': Sub_Menu, // 0 Подменю
         'blank_self': Blank_Self, // 2 Анкета Главная
         'blank_create': Blank_Create, // 2 Анкета Подтверждение создания
-        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода
+        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода анкеты
         'blank_delete': Blank_Delete, // 2 Анкета Удаление бланка
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,
         'blank_unlike': Blank_Unlike, // 3 Поиск - Случайный рандом дизлайкаем анкетку конфетку
+        'blank_report': Blank_Report, // 3 Поиск - Подтверждение ввода жалобы
+        'blank_report_ION': Blank_Report_Perfab_Input_ON, // 3 Поиск - активация режима ввода жалобы
         'mail_self': Mail_Self, // 4 Почта Главная
         'mail_like': Mail_Like, // 4 Почта - Лайкаем анкету в почте,
         'mail_unlike': Mail_Unlike, // 4 Почта - Дизлайкаем анкету в почте

@@ -55,7 +55,7 @@ export async function Random_Research(context: MessageContext) {
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '🛠⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id } })
+            InlineKeyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id } })
         ]
     ])
     await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)
@@ -96,4 +96,51 @@ export async function Blank_Unlike(context: MessageContext, queryPayload: any) {
     await Send_Message(context, `✅ Пропускаем анкету #${queryPayload.idb}.`)
 	await Logger(`(private chat) ~ clicked unswipe for <blank> #${queryPayload.idb} by <user> №${context.senderId}`)
     await Random_Research(context)
+}
+
+export async function Blank_Report(context: MessageContext, queryPayload: any) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return }
+	//await Online_Set(context)
+	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    // проверяем наличие жалобы на пользователя и его анкеты
+    const blank_report = await prisma.blank.findFirst({ where: { id: queryPayload.idb } })
+    if (!blank_report) { return }
+    const user_report = await prisma.account.findFirst({ where: { id: blank_report.id_account } })
+    if (!user_report) { return }
+    const keyboard = InlineKeyboard.keyboard([
+        [
+            InlineKeyboard.textButton({ text: '✏ Ввести жалобу', payload: { cmd: 'blank_report_ION', idb: blank_report.id } })
+        ],
+        [
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'random_research' } })
+        ]
+    ])
+    // подтверждаем готовность ввода жалобы
+	await Logger(`(private chat) ~ starting report writing on <blank> #${blank_report.id} by <user> №${context.chat.id}`)
+    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность нажав кнопку Ввести жалобу`, keyboard, /*blank.photo*/)
+    await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
+}
+
+export async function Blank_Report_Perfab_Input_ON(context: MessageContext, queryPayload: any) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return }
+	//await Online_Set(context)
+	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    await User_Pk_Init(context)
+    const id = await User_Pk_Get(context)
+    
+    if (id == null) { return }
+    users_pk[id].mode = 'input'
+    users_pk[id].operation = 'blank_report_prefab_input_off'
+	users_pk[id].id_target = queryPayload.idb
+	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
+    await Send_Message(context, `🧷 Введите причину жалобы от 10 до 2000 символов:`, /*blank.photo*/)
+    await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
 }
