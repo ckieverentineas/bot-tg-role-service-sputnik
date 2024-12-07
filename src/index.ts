@@ -1,6 +1,6 @@
 
 import * as dotenv from 'dotenv';
-import { Telegram } from 'puregram';
+import { Keyboard, Telegram } from 'puregram';
 
 const { QuestionManager } = require('puregram-question');
 
@@ -10,7 +10,7 @@ import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data
 import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
-import { Logger } from './module/helper';
+import { Logger, Send_Message, Sleep } from './module/helper';
 import { Sub_Menu } from './module/menu/sub';
 import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
@@ -38,7 +38,7 @@ export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmet
 
 telegram.updates.on('message', async (context: MessageContext) => {
     // Проверяем, является ли сообщение текстовым
-    console.log(context)
+    //console.log(context)
     
 	//await vk.api.messages.send({ peer_id: 463031671, random_id: 0, message: `тест2`, attachment: `photo200840769_457273112` } )
 	//Модуль вызова пкметра
@@ -52,10 +52,25 @@ telegram.updates.on('message', async (context: MessageContext) => {
 	const user_check = await prisma.account.findFirst({ where: { idvk: context.from?.id } })
 	//если пользователя нет, то начинаем регистрацию
 	if (!user_check) { await User_Registration(context); return }
-    const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-    const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.from?.username } })
+    
+    if (!context.from?.isBot) {
+        const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+        const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.from?.username } })
+    }
+    const keyboard = Keyboard.keyboard([
+        [ 
+          InlineKeyboard.textButton({ text: '!спутник', payload: 'archive_self' }),
+          InlineKeyboard.textButton({ text: `!пкметр`, payload: 'sniper_self' })
+        ]
+    ]).resize()
+    await telegram.api.sendMessage({chat_id: context.chat.id, text: 'Клавиатура', keyboard})
+    .then(async (response: any) => { 
+        console.log(response)
+        await Sleep(1000)
+        return telegram.api.deleteMessage({ chat_id: response.chat.id, message_id: response.message_id }) })
+    .then(() => { Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
+    .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });
 	//await Online_Set(context)
-	//await Keyboard_Index(context, `⌛ Загрузка, пожалуйста подождите...`)
 	return;
 });
 
@@ -103,7 +118,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     if (config.hasOwnProperty(command)) {
         try {
             await config[command](message, queryPayload);
-            //await message.editMessageReplyMarkup({ inline_keyboard: [] });
+            await message.editMessageReplyMarkup({ inline_keyboard: [] });
         } catch (e) {
             await Logger(`Error event detected for command '${command}': ${e}`);
         }

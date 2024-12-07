@@ -11,7 +11,17 @@ export async function Counter_PK_Module(context: any) {
     if (id == null) { return }
     if (context.text == `!пкметр` || context.text == `📐 Пкметр`) { users_pk[id].mode = 'pkmetr'; await Send_Message(context, `✅ Активирован режим замера ПК. Вводите рп посты, или любой другой текст длины, какая нужна вам! Когда закончите, нажмите !кончить, чтобы обнулить счет, нажмите !обнулить`); return true }
 	if (context.text == `!обнулить` || context.text == `${caller} !обнулить`) { users_pk[id].text = ``; Send_Message(context, `🗑️ Обнулен счетчик режима замера ПК`); return true }
-    if (context.text == `!кончить` || context.text == `${caller} !кончить`) { users_pk[id].mode = 'main'; users_pk[id].text = ``; Send_Message(context, `⛔ Обнулен и выключен режим замера ПК`); return true }
+    if (context.text == `!кончить` || context.text == `${caller} !кончить`) { 
+        users_pk[id].mode = 'main'; users_pk[id].text = ``; 
+        const keyboard = Keyboard.keyboard([
+            [ 
+              InlineKeyboard.textButton({ text: '!спутник', payload: 'archive_self' }),
+              InlineKeyboard.textButton({ text: `!пкметр`, payload: 'sniper_self' })
+            ]
+        ]).resize()
+        await Send_Message(context, `⛔ Обнулен и выключен режим замера ПК`, keyboard); 
+        return true 
+    }
 	if (context.text && typeof context.text == `string` && users_pk[id].mode == 'pkmetr') {
 		users_pk[id].text += context.text
         const keyboard = Keyboard.keyboard([
@@ -19,7 +29,7 @@ export async function Counter_PK_Module(context: any) {
               InlineKeyboard.textButton({ text: '!обнулить', payload: 'archive_self' }),
               InlineKeyboard.textButton({ text: `!кончить`, payload: 'sniper_self' })
             ]
-          ])
+        ]).resize()
 		//const lines = users.text.split(/...|..|.|!|\\?|!\\?|\\?!|;/).length; // количество предложений вообще не считается как надо, как надо?
 		const sentences = users_pk[id].text.match(/[^.!?]+[.!?]+/g);
 		const lines = sentences ? sentences.length : 0;
