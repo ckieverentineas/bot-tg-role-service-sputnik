@@ -94,7 +94,7 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
         await Send_Message_NotSelf(Number(user_warn.idvk), `🚫 На вашу анкету #${blank_report_check.id} донесли крысы ${counter_warn}/3. Изымаем анкету из поиска до разбирательства модераторами.`)
     }
     const blank_report_check_vision = await prisma.vision.findFirst({ where: { id_account: user_check.id, id_blank: blank_report_check.id }})
-    if (!blank_check) { const blank_skip = await prisma.vision.create({ data: { id_account: user_check.id, id_blank: blank_report_check.id } }) }
+    if (!blank_report_check_vision) { const blank_skip = await prisma.vision.create({ data: { id_account: user_check.id, id_blank: blank_report_check.id } }) }
     const keyboard = InlineKeyboard.keyboard([
         [ 
             InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } }),

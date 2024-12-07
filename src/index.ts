@@ -18,6 +18,7 @@ import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
+import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
 
 
 dotenv.config();
@@ -71,20 +72,28 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     const config: Record<string, Function> = {
         "success_processing_of_personal_data": Success_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Принятие
         "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
-        'main_menu': Main_Menu, // 0 Меню
-        'sub_menu': Sub_Menu, // 0 Подменю
-        'blank_self': Blank_Self, // 2 Анкета Главная
-        'blank_create': Blank_Create, // 2 Анкета Подтверждение создания
-        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета активация режима ввода анкеты
-        'blank_delete': Blank_Delete, // 2 Анкета Удаление бланка
+
+        'main_menu': Main_Menu, // 0 Меню - системное
+        'sub_menu': Sub_Menu, // 0 Подменю - дополнительное
+
+        'blank_self': Blank_Self, // 2 Анкета - Главное меню
+        'blank_create': Blank_Create, // 2 Анкета - Подтверждение создания анкеты пользователем
+        'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета - активация режима ввода анкеты пользователем
+        'blank_delete': Blank_Delete, // 2 Анкета - Удаление анкеты пользователем
+
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,
         'blank_unlike': Blank_Unlike, // 3 Поиск - Случайный рандом дизлайкаем анкетку конфетку
         'blank_report': Blank_Report, // 3 Поиск - Подтверждение ввода жалобы
         'blank_report_ION': Blank_Report_Perfab_Input_ON, // 3 Поиск - активация режима ввода жалобы
-        'mail_self': Mail_Self, // 4 Почта Главная
+
+        'mail_self': Mail_Self, // 4 Почта - Главное меню
         'mail_like': Mail_Like, // 4 Почта - Лайкаем анкету в почте,
         'mail_unlike': Mail_Unlike, // 4 Почта - Дизлайкаем анкету в почте
+
+        'moderate_self': Moderate_Self, // 5 Модерация - Главное меню
+        'moderate_success': Moderate_Success, // 5 Модерация - Одобрение жалоб
+        'moderate_denied': Moderate_Denied, // 5 Модерация - Отклонение жалоб
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;
