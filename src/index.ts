@@ -49,13 +49,13 @@ telegram.updates.on('message', async (context: MessageContext) => {
 	//console.log(users_pk)
 	if (input_st) { return }
 	//проверяем есть ли пользователь в базах данных
-	const user_check = await prisma.account.findFirst({ where: { idvk: context.from?.id } })
+	const user_check = await prisma.account.findFirst({ where: { idvk: context.chat?.id } })
 	//если пользователя нет, то начинаем регистрацию
 	if (!user_check) { await User_Registration(context); return }
     
-    if (!context.from?.isBot) {
+    if (!context.from?.isBot && context.chat.username) {
         const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-        const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.from?.username } })
+        const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.chat?.username } })
     }
     const keyboard = Keyboard.keyboard([
         [ 

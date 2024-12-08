@@ -33,7 +33,10 @@ export async function Counter_PK_Module(context: any) {
 		//const lines = users.text.split(/...|..|.|!|\\?|!\\?|\\?!|;/).length; // количество предложений вообще не считается как надо, как надо?
 		const sentences = users_pk[id].text.match(/[^.!?]+[.!?]+/g);
 		const lines = sentences ? sentences.length : 0;
-		await Send_Message(context, `🔎 Результаты анализа для [${sentences ? sentences[0] : ''} <--...--> ${sentences && sentences.length > 1 ? sentences[sentences.length-1] : ''}]:\n📕 Cимволов: ${users_pk[id].text.length}\n📙 Cимволов без пробелов: ${await countWords(users_pk[id].text)}\n📗 Cлов: ${await countWords2(users_pk[id].text)}\n💻 ПК: ${(users_pk[id].text.length/102).toFixed(2)}\n📱 МБ: ${(users_pk[id].text.length/35).toFixed(2)}\n✏ Предложений: ${lines}\n📰 Пост: ${(users_pk[id].text.length/16384*100).toFixed(2)}%\n📧 Комментарий: ${(users_pk[id].text.length/280*100).toFixed(2)}%\n💬 Обсуждение: ${(users_pk[id].text.length/4096*100).toFixed(2)}%`, keyboard)
+		await Send_Message(context, `🔎 Результаты анализа для [${sentences ? sentences[0] : ''} <--...--> ${sentences && sentences.length > 1 ? sentences[sentences.length-1] : ''}]:
+            \n✨ Общая статистика:\n📕 Cимволов: ${users_pk[id].text.length}\n📙 Cимволов без пробелов: ${await countWords(users_pk[id].text)}\n📗 Cлов: ${await countWords2(users_pk[id].text)}\n✏ Предложений: ${lines}
+            \n✨ Эталон для Телеграм:\n💻 ПК: ${(users_pk[id].text.length/60).toFixed(2)}\n📱 МБ: ${(users_pk[id].text.length/34).toFixed(2)}\n💬 Сообщение: ${(users_pk[id].text.length/4096*100).toFixed(2)}%
+            \n✨ Эталон для Вконтакте:\n💻 ПК: ${(users_pk[id].text.length/102).toFixed(2)}\n📱 МБ: ${(users_pk[id].text.length/35).toFixed(2)}\n📰 Пост: ${(users_pk[id].text.length/16384*100).toFixed(2)}%\n📧 Комментарий: ${(users_pk[id].text.length/280*100).toFixed(2)}%\n💬 Обсуждение: ${(users_pk[id].text.length/4096*100).toFixed(2)}%`, keyboard)
 	} else {
         return false
     }

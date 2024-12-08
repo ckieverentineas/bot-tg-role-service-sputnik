@@ -70,6 +70,9 @@ export async function Blank_Create(context: MessageContext) {
 }
 
 export async function Blank_Create_Prefab_Input_ON(context: MessageContext) {
+    if (!context.chat.username) {
+        return await Send_Message(context, 'Установите username в настройках профиля телеграмма своего аккаунта')
+    }
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
