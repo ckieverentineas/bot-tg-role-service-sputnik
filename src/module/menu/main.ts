@@ -14,7 +14,7 @@ export async function Main_Menu(context: MessageContext) {
         InlineKeyboard.textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } })
       ],
       [ 
-        InlineKeyboard.textButton({ text: '🛠⚙ Цензура', payload: { cmd: 'censored_change' } }),
+        InlineKeyboard.textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } }),
         InlineKeyboard.textButton({ text: '🛠☠ Банхаммер', payload: { cmd: 'banhammer_self' } })
       ],
       [

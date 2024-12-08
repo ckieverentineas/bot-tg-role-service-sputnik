@@ -7,10 +7,11 @@ import { Censored_Activation_Pro } from "../other/censored"
 export async function Mail_Self(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
 	if (!user_check) { return }
+    const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     if (!blank_check) { return await Send_Message(context, `Чтобы воспользоваться почтой, нажмите кнопку в главном меню "📃 Моя анкета" или вызовите команду !анкета в чате для создания анкеты персонажа`)}
-	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
 	//await Online_Set(context)
 	let mail_build = null
 	for (const mail of await prisma.mail.findMany({ where: { blank_to: blank_check.id, read: false, find: true } })) {

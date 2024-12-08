@@ -9,7 +9,7 @@ export async function Blank_Self(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     const keyboard = InlineKeyboard.keyboard([
@@ -52,7 +52,7 @@ export async function Blank_Create(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (blank_check) { return }
@@ -76,7 +76,7 @@ export async function Blank_Create_Prefab_Input_ON(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (blank_check) { return }
@@ -96,14 +96,11 @@ export async function Blank_Delete(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
-    if (blank_check.banned) {
-        await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`)
-        return
-    }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
     const keyboard = InlineKeyboard.keyboard([
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
@@ -113,5 +110,23 @@ export async function Blank_Delete(context: MessageContext) {
     if (blank_delete) { 
         await Send_Message(context, `✅ Успешно удалено:\n📜 Анкета: ${blank_delete.id}\n💬 Содержание:\n${blank_delete.text}`, keyboard)
         await Logger(`(private chat) ~ deleted self <blank> #${blank_delete.id} by <user> №${context.senderId}`)
+    }
+}
+
+export async function Censored_Change(context: MessageContext) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	//await Online_Set(context)
+	const censored_change = await prisma.account.update({ where: { id: user_check.id }, data: { censored: user_check.censored ? false : true } })
+    if (censored_change) { 
+        const keyboard = InlineKeyboard.keyboard([
+            [
+                InlineKeyboard.textButton({ text: '✅ В меню', payload: { cmd: 'main_menu' } })
+            ]
+        ])
+        await Send_Message(context, `🔧 Цензура ${censored_change.censored ? 'активирована' : 'отключена'}`, keyboard)
+        await Logger(`(private chat) ~ changed status activity censored self by <user> №${context.chat.id}`)
     }
 }

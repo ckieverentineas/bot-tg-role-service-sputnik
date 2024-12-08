@@ -9,10 +9,11 @@ import { Blank } from "@prisma/client";
 export async function Random_Research(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
+    const banned_me = await User_Banned(context)
+    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     if (!blank_check) { return await Send_Message(context, `⚠ Создайте анкету`) }
-    const banned_me = await User_Banned(context)
-    if (banned_me) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
     //await Online_Set(context)
     let blank_build = null
     for (const blank of await prisma.$queryRaw<Blank[]>`SELECT * FROM Blank WHERE banned = false ORDER BY random() ASC`) {
@@ -102,10 +103,11 @@ export async function Blank_Report(context: MessageContext, queryPayload: any) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
     // проверяем наличие жалобы на пользователя и его анкеты
     const blank_report = await prisma.blank.findFirst({ where: { id: queryPayload.idb } })
     if (!blank_report) { return }
@@ -129,10 +131,11 @@ export async function Blank_Report_Perfab_Input_ON(context: MessageContext, quer
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	//await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
     const report_check = await prisma.report.findFirst({ where: { id_blank:  queryPayload.idb, id_account: user_check.id }})
     if (report_check) { return await Send_Message(context, `Вы уже подавали жалобу на анкету ${report_check.id_blank}`)}
     await User_Pk_Init(context)

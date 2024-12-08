@@ -13,7 +13,7 @@ import { commandUserRoutes } from './command';
 import { Logger, Send_Message, Sleep } from './module/helper';
 import { Sub_Menu } from './module/menu/sub';
 import { Main_Menu } from './module/menu/main';
-import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
@@ -37,6 +37,7 @@ commandUserRoutes(hearManager)
 export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string, id_target: number | null }> = []
 
 telegram.updates.on('message', async (context: MessageContext) => {
+    if (context.chat.id < 0) { return }
     // Проверяем, является ли сообщение текстовым
     //console.log(context)
     
@@ -102,6 +103,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_unlike': Blank_Unlike, // 3 Поиск - Случайный рандом дизлайкаем анкетку конфетку
         'blank_report': Blank_Report, // 3 Поиск - Подтверждение ввода жалобы
         'blank_report_ION': Blank_Report_Perfab_Input_ON, // 3 Поиск - активация режима ввода жалобы
+        'censored_change': Censored_Change, // 3 Поиск - Активация/Реактивация цензуры
 
         'mail_self': Mail_Self, // 4 Почта - Главное меню
         'mail_like': Mail_Like, // 4 Почта - Лайкаем анкету в почте,
