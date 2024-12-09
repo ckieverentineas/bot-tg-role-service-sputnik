@@ -1,5 +1,5 @@
 import { HearManager } from "@puregram/hear";
-import { InlineKeyboard, MessageContext } from "puregram";
+import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
 import prisma from "./module/prisma";
 import { Accessed, Logger, Send_Message, Send_Message_NotSelf } from "./module/helper";
 import { root } from ".";
@@ -7,62 +7,26 @@ import { Account } from "@prisma/client";
 
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
   // главное меню
-  hearManager.hear(/!спутник|!Спутник/, async (context: any) => {
+  hearManager.hear(/!спутник|!Спутник|\/sputnik/, async (context: any) => {
     if (context.chat.id < 0) { return }
     const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
     if (!user_check) { return }
     //await Online_Set(context)
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
-    const keyboard = InlineKeyboard.keyboard([
-      [ 
-        InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
-        InlineKeyboard.textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } })
-      ],
-      [ 
-        InlineKeyboard.textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } }),
-        InlineKeyboard.textButton({ text: '☠ Банхаммер', payload: { cmd: 'banhammer_self' } })
-      ],
-      [
-        InlineKeyboard.textButton({ text: '🌐 Браузер', payload: { cmd: 'browser_research' } }),
-        InlineKeyboard.textButton({ text: '🔍 Поиск', payload: { cmd: 'basic_research' } })
-      ],
-      [
-        InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } }),
-        InlineKeyboard.textButton({ text: '📐 Пкметр', payload: { cmd: 'pkmetr' } })
-      ],
-      (user_check.donate || await Accessed(context) != `user`) ?
-      [
-        InlineKeyboard.textButton({ text: '🔧 Плагины', payload: { cmd: 'sub_menu' } }),
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } })
-      ] :
-      [
-        InlineKeyboard.textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } })
-      ]
-    ])
+    const keyboard = new InlineKeyboardBuilder()
+    .textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } })
+    .textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } }).row()
+    .textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } })
+    .textButton({ text: '🛠🌐 Тегатор', payload: { cmd: 'browser_research' } }).row()
+    .textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } })
+    .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } }).row()
+    if (user_check.donate || await Accessed(context) != `user`) {
+      keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_self' } })
+      .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_self' } }).row()
+      .textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
+    }
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
-    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
-  })
-  // дополнительное меню
-  hearManager.hear(/🔧 Плагины|! Плагин|!плагин/, async (context: any) => {
-    const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
-    if (!user_check) { return }
-    //await Online_Set(context)
-    const keyboard = InlineKeyboard.keyboard([
-      [ 
-        InlineKeyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_self' } }),
-        InlineKeyboard.textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_self' } })
-      ],
-      (await Accessed(context) != `user`) ?
-      [
-        InlineKeyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } }),
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-      ] :
-      [
-        InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-      ]
-    ])
-    await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}. Добро пожаловать в меню расширенного функционала!`, keyboard)
     await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
   })
   // только для рут пользователя, выдача админки
@@ -73,11 +37,21 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       const lvlup = await prisma.account.update({ where: { id: user.id }, data: { id_role: 2 } })
       if (lvlup) {
           await Send_Message(context, `⚙ Рут права получены`)
-          console.log(`Super user ${context.chat.id} got root`)
+          await Logger(`Super user ${context.chat.id} got root`)
       } else {
           await Send_Message(context, `⚙ Ошибка`)
       }
     }
+  })
+  // только для рут пользователя, выдача админки
+  hearManager.hear(/!помощь|\/help/, async (context: any) => {
+    if (context.chat.id < 0) { return }
+    await Send_Message(context, `☠ Команды бота уже сделанные:
+    \n👤 !бонькхаммер @username - где username уникальный адрес пользователя в тг, добавляет/убирает из черного списка в Спутнике;
+    \n👥 !права @username - где username уникальный адрес пользователя в тг, добавляет/убирает из списка администраторов в Спутнике;
+    \n👥 !бан @username - где username уникальный адрес пользователя в тг, добавляет/удаляет в бан Спутника для приостановки доступа.
+    \n⚠ Команды с символами:\n👤 - Доступны обычным пользователям;\n👥 - Доступны администраторам бота;`)
+    await Logger(`Super help ${context.chat.id} got root`)
   })
   // выдача админ прав админами пользователям
   hearManager.hear(/!права/, async (context: MessageContext) => {
@@ -121,5 +95,31 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Send_Message(context, `🔧 Анкета ${blank_del.id} владельца @${login.username} была удалена:\n ${blank_del.text}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Ваша анкета ${blank_del.id} была удалена:\n ${blank_del.text}`)
     }
+  })
+  hearManager.hear(/!бонькхаммер|!чс/, async (context: MessageContext) => {
+    if (context.chat.id < 0) { return }
+    const account_self:any = await prisma.account.findFirst({ where: { idvk: Number(context.chat.id) } })
+    if (!account_self) { return }
+    let [ command, target ] = context.text!.split(' ')
+    if (typeof target != 'string') { return }
+    target = target.replace('@', '')
+    const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
+    if (!account_check) { 
+      await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+      return Send_Message(context, `🔧 @${target} не существует`);
+    }
+		//await Online_Set(context)
+    //проверка на наличие врага в черном списке
+    const black_list_ch = await prisma.blackList.findFirst({ where: { id_account: account_self.id, idvk: account_check.idvk } })
+    if (black_list_ch) { 
+      const keyboard = new InlineKeyboardBuilder()
+      .textButton({ text: '📃 Амнистия', payload: { cmd: 'unbanhammer', idb:  black_list_ch.id } })
+      return await Send_Message(context, `⚠ К сожалению, пользователь @${account_check.username} уже в вашем черном списке. Как бы ни хотелось, но дважды и более подряд в ЧС не добавишь!`, keyboard); 
+    }
+    //добавление в черный список
+    const blacklist_save = await prisma.blackList.create({ data: { idvk: Number(account_check.idvk), id_account: account_self.id } })
+    if (!blacklist_save) { return }
+    await Logger(`In database, added new person BL: ${blacklist_save.id}-${blacklist_save.idvk} by admin ${context.senderId}`)
+    await context.send(`🔧 Вы добавили в черный список пользователя @${account_check.username}`)
   })
 }

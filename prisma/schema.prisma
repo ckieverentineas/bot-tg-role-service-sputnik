@@ -25,7 +25,7 @@ model Account {
 }
 model BlackList {
   id       Int      @id @default(autoincrement())
-  idvk     Int
+  idvk     BigInt
   id_account Int
   account    Account  @relation(fields: [id_account], references: [id], onDelete: Cascade)
 }

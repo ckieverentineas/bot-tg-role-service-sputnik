@@ -1,6 +1,6 @@
 
 import * as dotenv from 'dotenv';
-import { Keyboard, Telegram } from 'puregram';
+import { Keyboard, KeyboardBuilder, Telegram } from 'puregram';
 
 const { QuestionManager } = require('puregram-question');
 
@@ -11,7 +11,6 @@ import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Logger, Send_Message, Sleep } from './module/helper';
-import { Sub_Menu } from './module/menu/sub';
 import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
@@ -19,6 +18,7 @@ import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
+import { UnBanHammer } from './module/account/banhammer';
 
 
 dotenv.config();
@@ -54,23 +54,22 @@ telegram.updates.on('message', async (context: MessageContext) => {
 	//если пользователя нет, то начинаем регистрацию
 	if (!user_check) { await User_Registration(context); return }
     
-    if (!context.from?.isBot && context.chat.username) {
+    if (context.chat.id > 0) {
         const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-        const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.chat?.username } })
+        if (context.chat.username != user?.username) {
+            const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.chat?.username } })
+            await Send_Message(context, `Ваш юзернейм изменился с ${user?.username} на ${save?.username}`)
+        }
     }
-    const keyboard = Keyboard.keyboard([
-        [ 
-          InlineKeyboard.textButton({ text: '!спутник', payload: 'archive_self' }),
-          InlineKeyboard.textButton({ text: `!пкметр`, payload: 'sniper_self' })
-        ]
-    ]).resize()
-    await telegram.api.sendMessage({chat_id: context.chat.id, text: 'Клавиатура', keyboard})
-    .then(async (response: any) => { 
+    const keyboard = new KeyboardBuilder().textButton('!спутник' )
+    .textButton(`!пкметр`).resize()
+    await telegram.api.sendMessage({ chat_id: context.chat.id, text: `Емаа Клава Кока подьехала`, reply_markup: keyboard })
+    /*.then(async (response: any) => { 
         console.log(response)
-        await Sleep(1000)
-        return telegram.api.deleteMessage({ chat_id: response.chat.id, message_id: response.message_id }) })
-    .then(() => { Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
-    .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });
+        await Sleep(10000)
+        return await telegram.api.deleteMessage({ chat_id: response.chat.id, message_id: response.message_id }) })
+    .then(async () => { await Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
+    .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });*/
 	//await Online_Set(context)
 	return;
 });
@@ -91,7 +90,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
 
         'main_menu': Main_Menu, // 0 Меню - системное
-        'sub_menu': Sub_Menu, // 0 Подменю - дополнительное
+        'unbanhammer': UnBanHammer, // Банхаммер - амнистия
 
         'blank_self': Blank_Self, // 2 Анкета - Главное меню
         'blank_create': Blank_Create, // 2 Анкета - Подтверждение создания анкеты пользователем
@@ -131,10 +130,22 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     //await telegram.api.answerCallbackQuery(query.chatInstance);
 });
 
+const commands = [
+    { command: '/sputnik', description: 'main menu' },
+    { command: '/help', description: 'help menu' },
+    { command: '/pkmetr', description: 'chlen menu' },
+];
+
+try {
+    telegram.api.setMyCommands({ commands: commands, language_code: 'ru' } );
+    Logger('Команды успешно установлены на русском языке');
+} catch (error) {
+    console.error('Ошибка при установке команд:', error);
+}
 // Запускаем сервер Telegram
-telegram.updates.startPolling().then(
-    () => console.log(`@${telegram.bot.username} started polling`)
-  )
+telegram.updates.startPolling().then(async () => {
+    await Logger(`@${telegram.bot.username} started polling`)
+})
 /*
 telegram.updates.on('message', async (msg: any) => {
     // Создаем клавиатуру
