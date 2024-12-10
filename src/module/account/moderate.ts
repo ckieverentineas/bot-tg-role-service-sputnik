@@ -1,13 +1,13 @@
 import { InlineKeyboard, MessageContext } from "puregram"
 import prisma from "../prisma"
-import { Accessed, Logger, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper"
+import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper"
 import { Blank, Mail } from "@prisma/client"
 import { Censored_Activation_Pro } from "../other/censored"
 
 export async function Moderate_Self(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
 	if (!user_check) { return }
-	//await Online_Set(context)
+	await Online_Set(context)
     if (await Accessed(context) == 'user') { return }
 	let mail_build = null
 	for (const blank of await prisma.blank.findMany({ where: { banned: true } })) {

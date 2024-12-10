@@ -1,6 +1,6 @@
 import { InlineKeyboard } from "puregram";
 import { users_pk } from "../..";
-import { Accessed, Blank_Cleaner, Logger, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
+import { Accessed, Blank_Cleaner, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
 import prisma from "../prisma";
 import { Censored_Activation_Pro } from "./censored";
 import { User_Pk_Get, User_Pk_Init } from "./pk_metr";
@@ -48,7 +48,7 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
 	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (blank_check) { return }
-	//await Online_Set(context)
+	await Online_Set(context)
     let text_input = await Blank_Cleaner(users_pk[id].text)
     if (text_input.length < 30) { await Send_Message(context, `Анкету от 30 символов надо!`); return }
     await Logger(`(private chat) ~ starting creation self blank by <user> №${context.senderId}`)
@@ -73,7 +73,7 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
 	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
-	//await Online_Set(context)
+	await Online_Set(context)
     let text_input = await Blank_Cleaner(users_pk[id].text)
     if (text_input.length < 10) { return await Send_Message(context, `⚠ Жалобу от 10 символов надо!`); }
     if (text_input.length > 2000) { return await Send_Message(context, `⚠ Жалобу до 2000 символов надо!`);  }

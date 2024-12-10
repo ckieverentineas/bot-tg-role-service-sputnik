@@ -1,7 +1,7 @@
 import { HearManager } from "@puregram/hear";
 import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
 import prisma from "./module/prisma";
-import { Accessed, Logger, Send_Message, Send_Message_NotSelf } from "./module/helper";
+import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf } from "./module/helper";
 import { root } from ".";
 import { Account } from "@prisma/client";
 
@@ -11,7 +11,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     if (context.chat.id < 0) { return }
     const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
     if (!user_check) { return }
-    //await Online_Set(context)
+    await Online_Set(context)
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
     const keyboard = new InlineKeyboardBuilder()
@@ -46,9 +46,11 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
   // только для рут пользователя, выдача админки
   hearManager.hear(/!помощь|\/help/, async (context: any) => {
     if (context.chat.id < 0) { return }
+    await Online_Set(context)
     await Send_Message(context, `☠ Команды бота уже сделанные:
     \n👤 !бонькхаммер @username - где username уникальный адрес пользователя в тг, добавляет/убирает из черного списка в Спутнике;
     \n👥 !права @username - где username уникальный адрес пользователя в тг, добавляет/убирает из списка администраторов в Спутнике;
+    \n👥 !донатер @username - где username уникальный адрес пользователя в тг, добавляет/убирает из списка донатеров в Спутнике;
     \n👥 !бан @username - где username уникальный адрес пользователя в тг, добавляет/удаляет в бан Спутника для приостановки доступа.
     \n⚠ Команды с символами:\n👤 - Доступны обычным пользователям;\n👥 - Доступны администраторам бота;`)
     await Logger(`Super help ${context.chat.id} got root`)
@@ -65,7 +67,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
         await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
         return Send_Message(context, `🔧 @${target} не существует`);
       }
-			//await Online_Set(context)
+			await Online_Set(context)
       const login = await prisma.account.update({ where: { id: account_check.id }, data: { id_role: account_check.id_role == 1 ? 2 : 1 } })
       await Send_Message(context, `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.id_role == 2 ? 'добавлены в лист администраторов' : 'убраны из листа администраторов'}`)
@@ -84,7 +86,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
         await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
         return Send_Message(context, `🔧 @${target} не существует`);
       }
-			//await Online_Set(context)
+			await Online_Set(context)
       const login = await prisma.account.update({ where: { id: account_check.id }, data: { banned: account_check.banned ? false : true } })
       await Send_Message(context, `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.banned ? 'добавлены в лист забаненных' : 'убраны из листа забаненных'}`)
@@ -108,7 +110,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
       return Send_Message(context, `🔧 @${target} не существует`);
     }
-		//await Online_Set(context)
+		await Online_Set(context)
     //проверка на наличие врага в черном списке
     const black_list_ch = await prisma.blackList.findFirst({ where: { id_account: account_self.id, idvk: account_check.idvk } })
     if (black_list_ch) { 
@@ -121,5 +123,24 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     if (!blacklist_save) { return }
     await Logger(`In database, added new person BL: ${blacklist_save.id}-${blacklist_save.idvk} by admin ${context.senderId}`)
     await context.send(`🔧 Вы добавили в черный список пользователя @${account_check.username}`)
+  })
+
+  hearManager.hear(/!донатер/, async (context: MessageContext) => {
+    if (context.chat.id < 0) { return }
+    if (context.chat.id == Number(root) || await Accessed(context) != 'user') {
+      let [ command, target ] = context.text!.split(' ')
+      if (typeof target != 'string') { return }
+      target = target.replace('@', '')
+      const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
+      if (!account_check) { 
+        await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+        return Send_Message(context, `🔧 @${target} не существует`);
+      }
+			await Online_Set(context)
+      const login = await prisma.account.update({ where: { id: account_check.id }, data: { donate: account_check.donate ? false : true } })
+      await Send_Message(context, `🔧 @${login.username} ${login.donate ? 'добавлен в лист донатеров' : 'убран из листа донатеров'}`)
+			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.donate ? 'добавлены в лист донатеров' : 'убраны из листа донатеров'}`)
+			await Logger(`(private chat) ~ donate status changed <${login.donate ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
+    }
   })
 }

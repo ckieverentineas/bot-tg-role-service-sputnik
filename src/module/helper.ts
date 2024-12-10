@@ -71,3 +71,11 @@ export function Sleep(ms: number) {
         setTimeout(resolve, ms);
     });
 }
+
+export async function Online_Set(context: any) {
+    const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (user) {
+        const user_online = await prisma.account.update({ where: { id: user.id }, data: { online: new Date() } })
+        //await Logger(`(online) ~ change online from ${user.online} on ${user_online.online} for <user> №${context.senderId}`)
+    }
+}

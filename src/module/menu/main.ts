@@ -1,11 +1,11 @@
 import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
 import prisma from "../prisma";
-import { Accessed, Logger, Send_Message } from "../helper";
+import { Accessed, Logger, Online_Set, Send_Message } from "../helper";
 
 export async function Main_Menu(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
-    //await Online_Set(context)
+    await Online_Set(context)
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
     const keyboard = new InlineKeyboardBuilder()
