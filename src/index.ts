@@ -19,6 +19,7 @@ import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, R
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
 import { UnBanHammer } from './module/account/banhammer';
+import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseacher/archive';
 
 
 dotenv.config();
@@ -104,6 +105,10 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_report': Blank_Report, // 3 Поиск - Подтверждение ввода жалобы
         'blank_report_ION': Blank_Report_Perfab_Input_ON, // 3 Поиск - активация режима ввода жалобы
         'censored_change': Censored_Change, // 3 Поиск - Активация/Реактивация цензуры
+
+        'archive_research': Archive_Research, // 3 Поиск - Случайный рандом по уже просмотренным анкетам входная точка
+        'archive_like': Archive_Like, // 3 Поиск - Случайный рандом анти лайкаем анкетку конфетку,
+        'archive_unlike': Archive_Unlike, // 3 Поиск - Случайный рандом анти дизлайкаем анкетку конфетку
 
         'mail_self': Mail_Self, // 4 Почта - Главное меню
         'mail_like': Mail_Like, // 4 Почта - Лайкаем анкету в почте,
