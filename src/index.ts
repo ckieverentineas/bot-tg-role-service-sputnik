@@ -12,7 +12,7 @@ import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Logger, Send_Message, Sleep } from './module/helper';
 import { Main_Menu } from './module/menu/main';
-import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Self, Censored_Change } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
@@ -95,7 +95,8 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_self': Blank_Self, // 2 Анкета - Главное меню
         'blank_create': Blank_Create, // 2 Анкета - Подтверждение создания анкеты пользователем
         'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета - активация режима ввода анкеты пользователем
-        'blank_delete': Blank_Delete, // 2 Анкета - Удаление анкеты пользователем
+        'blank_delete': Blank_Delete, // 2 Анкета - Удаление анкеты пользователем,
+        'blank_edit_prefab_input_on': Blank_Edit_Prefab_Input_ON, // 2 Анкета - Изменение анкеты пользователем
 
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,

@@ -20,6 +20,7 @@ export async function Input_Module(context: any) {
     }
     const config: Record<string, Function> = {
         "blank_create_prefab_input_off": Blank_Create_Prefab_Input_Off, // 1 Анкета - Сохранение анкеты
+        'blank_edit_prefab_input_off': Blank_Edit_Prefab_Input_Off, // 1 Анкета - Изменение анкеты
         "blank_report_prefab_input_off": Blank_Report_Prefab_Input_Off, // 2 Рандом - жалоба на анкету
     };
     
@@ -52,7 +53,7 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     let text_input = await Blank_Cleaner(users_pk[id].text)
     if (text_input.length < 30) { await Send_Message(context, `Анкету от 30 символов надо!`); return }
     await Logger(`(private chat) ~ starting creation self blank by <user> №${context.senderId}`)
-    await Send_Message(context, `⚠ В анкете зарегистрировано ${users_pk[id].text.length} из ${text_input.length} введенных вами символов.`)
+    await Send_Message(context, `⚠ В анкете зарегистрировано ${text_input.length} из ${users_pk[id].text.length} введенных вами символов.`)
     const save = await prisma.blank.create({ data: { text: text_input, id_account: user_check.id } })
     const keyboard = InlineKeyboard.keyboard([
         [ 
@@ -61,6 +62,36 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
         ]
       ])
 	await Send_Message(context, `🔧 Вы успешно создали анкетку-конфетку под UID: ${save.id}\n${save.text}`, keyboard)
+    users_pk[id].operation = ''
+    users_pk[id].text = ''
+}
+
+async function Blank_Edit_Prefab_Input_Off(context: any, id: number) {
+    console.log(context)
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+    const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+    const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
+	await Online_Set(context)
+    const datenow: any = new Date()
+    const dateold: any = new Date(blank_check.crdate)
+	const timeouter = 86400000
+    if (datenow-dateold > timeouter) { return await Send_Message(context, `⚠ Анкете больше суток, редактирование запрещено`) }
+    let text_input = await Blank_Cleaner(users_pk[id].text)
+    if (text_input.length < 30) { await Send_Message(context, `Анкету от 30 символов надо!`); return }
+    await Send_Message(context, `⚠ В анкете зарегистрировано ${text_input.length} из ${users_pk[id].text.length} введенных вами символов.`)
+    const blank_edit = await prisma.blank.update({ where: { id: blank_check.id, id_account: user_check.id }, data: { text: text_input } })
+    const keyboard = InlineKeyboard.keyboard([
+        [ 
+            InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+        ]
+      ])
+	await Send_Message(context, `✅ Успешно изменено:\n📜 Анкета: ${blank_edit.id}\n💬 Содержание:\n${blank_edit.text}`, keyboard)
+    await Logger(`(private chat) ~ finished edit self <blank> #${blank_check.id} by <user> №${context.senderId}`)
     users_pk[id].operation = ''
     users_pk[id].text = ''
 }

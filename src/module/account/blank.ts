@@ -16,7 +16,7 @@ export async function Blank_Self(context: MessageContext) {
         (blank_check) ?
         [
           InlineKeyboard.textButton({ text: '⛔ Удалить', payload: { cmd: 'blank_delete' } }),
-          InlineKeyboard.textButton({ text: '🛠✏ Изменить', payload: { cmd: 'blank_edit' } })
+          InlineKeyboard.textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } })
         ] :
         [
           InlineKeyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
@@ -92,6 +92,28 @@ export async function Blank_Create_Prefab_Input_ON(context: MessageContext) {
     await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
 }
 
+export async function Blank_Edit_Prefab_Input_ON(context: MessageContext) {
+    if (!context.chat.username) {
+        return await Send_Message(context, 'Установите username в настройках профиля телеграмма своего аккаунта')
+    }
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	await Online_Set(context)
+	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    await User_Pk_Init(context)
+    const id = await User_Pk_Get(context)
+    
+    if (id == null) { return }
+    users_pk[id].mode = 'input'
+    users_pk[id].operation = 'blank_edit_prefab_input_off'
+
+	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
+    await Send_Message(context, `📎 Введите измененную анкету:`, /*blank.photo*/)
+    await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
+}
 export async function Blank_Delete(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
