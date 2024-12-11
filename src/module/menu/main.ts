@@ -18,8 +18,15 @@ export async function Main_Menu(context: MessageContext) {
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
       .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_self' } }).row()
-      .textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
     }
+    if (await Accessed(context) != `user`) {
+      keyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
+      keyboard.textButton({ text: '📊 Забаненные', payload: { cmd: 'list_ban' } }).row()
+      keyboard.textButton({ text: '📊 Донатеры', payload: { cmd: 'list_donate' } })
+      keyboard.textButton({ text: '📊 Админы', payload: { cmd: 'list_admin' } }).row()
+    }
+    keyboard.textButton({ text: '📊 Список ЧС', payload: { cmd: 'list_banhammer' } })
+    keyboard.urlButton({ text: '🔍 Найти в ВК', url: 'https://vk.com/sputnikbot' })
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
     await Logger(`SSL(private chat) ~ enter in main menu system is viewed by <user> №${context.chat.id}`)
 }

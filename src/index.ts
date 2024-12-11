@@ -10,7 +10,7 @@ import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data
 import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
-import { Logger, Send_Message, Sleep } from './module/helper';
+import { Logger, Online_Set, Send_Message, Sleep } from './module/helper';
 import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
@@ -20,6 +20,7 @@ import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
 import { UnBanHammer } from './module/account/banhammer';
 import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseacher/archive';
+import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/account/statistics';
 
 
 dotenv.config();
@@ -62,16 +63,7 @@ telegram.updates.on('message', async (context: MessageContext) => {
             await Send_Message(context, `Ваш юзернейм изменился с ${user?.username} на ${save?.username}`)
         }
     }
-    const keyboard = new KeyboardBuilder().textButton('!спутник' )
-    .textButton(`!пкметр`).resize()
-    await telegram.api.sendMessage({ chat_id: context.chat.id, text: `Емаа Клава Кока подьехала`, reply_markup: keyboard })
-    /*.then(async (response: any) => { 
-        console.log(response)
-        await Sleep(10000)
-        return await telegram.api.deleteMessage({ chat_id: response.chat.id, message_id: response.message_id }) })
-    .then(async () => { await Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
-    .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });*/
-	//await Online_Set(context)
+	await Online_Set(context)
 	return;
 });
 
@@ -117,6 +109,11 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'moderate_self': Moderate_Self, // 5 Модерация - Главное меню
         'moderate_success': Moderate_Success, // 5 Модерация - Одобрение жалоб
         'moderate_denied': Moderate_Denied, // 5 Модерация - Отклонение жалоб
+
+        'list_admin': List_Admin, // 6 Статистика - Список администраторов
+        'list_donate': List_Donate, // 6 Статистика - Список донатеров
+        'list_ban': List_Ban, // 6 Статистика - Список забаненных
+        'list_banhammer': List_Banhammer, // 6 Статистика - Список пользователей в черном списке пользователя
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;
@@ -140,6 +137,7 @@ const commands = [
     { command: '/sputnik', description: 'main menu' },
     { command: '/help', description: 'help menu' },
     { command: '/pkmetr', description: 'chlen menu' },
+    { command: '/keyboard', description: 'get call buttons' },
 ];
 
 try {

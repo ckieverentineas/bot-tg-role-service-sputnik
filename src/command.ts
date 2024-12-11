@@ -1,11 +1,25 @@
 import { HearManager } from "@puregram/hear";
-import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
+import { InlineKeyboard, InlineKeyboardBuilder, KeyboardBuilder, MessageContext } from "puregram";
 import prisma from "./module/prisma";
 import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf } from "./module/helper";
 import { root } from ".";
 import { Account } from "@prisma/client";
 
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
+  hearManager.hear(/!Клава|!клава|\/keyboard/, async (context: any) => {
+    if (context.chat.id < 0) { return }
+    const keyboard = new KeyboardBuilder().textButton('!спутник' )
+    .textButton(`!пкметр`).resize()
+    //await telegram.api.sendMessage({ chat_id: context.chat.id, text: `Емаа Клава Кока подьехала`, reply_markup: keyboard })
+    /*.then(async (response: any) => { 
+        console.log(response)
+        await Sleep(10000)
+        return await telegram.api.deleteMessage({ chat_id: response.chat.id, message_id: response.message_id }) })
+    .then(async () => { await Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
+    .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });*/
+    await Send_Message(context, `🛰 Выдали для вас клавиатуру, ${context.chat.firstName}`, keyboard)
+    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+  })
   // главное меню
   hearManager.hear(/!спутник|!Спутник|\/sputnik/, async (context: any) => {
     if (context.chat.id < 0) { return }
@@ -24,8 +38,15 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
       .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_self' } }).row()
-      .textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
     }
+    if (await Accessed(context) != `user`) {
+      keyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
+      keyboard.textButton({ text: '📊 Забаненные', payload: { cmd: 'list_ban' } }).row()
+      keyboard.textButton({ text: '📊 Донатеры', payload: { cmd: 'list_donate' } })
+      keyboard.textButton({ text: '📊 Админы', payload: { cmd: 'list_admin' } }).row()
+    }
+    keyboard.textButton({ text: '📊 Список ЧС', payload: { cmd: 'list_banhammer' } })
+    keyboard.urlButton({ text: '🔍 Найти в ВК', url: 'https://vk.com/sputnikbot' })
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
     await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
   })
