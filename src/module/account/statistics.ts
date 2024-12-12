@@ -45,7 +45,6 @@ export async function List_Banhammer(context: any) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     await Online_Set(context)
-    if (await Accessed(context) == `user`) { return }
     let puller = '🏦 Полный спектр врагов... \n'
     const usersr = await prisma.blackList.findMany({ where: { id_account: user_check.id } })
     for (const i in usersr) { 

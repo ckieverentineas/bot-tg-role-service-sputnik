@@ -22,6 +22,7 @@ export async function Input_Module(context: any) {
         "blank_create_prefab_input_off": Blank_Create_Prefab_Input_Off, // 1 Анкета - Сохранение анкеты
         'blank_edit_prefab_input_off': Blank_Edit_Prefab_Input_Off, // 1 Анкета - Изменение анкеты
         "blank_report_prefab_input_off": Blank_Report_Prefab_Input_Off, // 2 Рандом - жалоба на анкету
+        'blank_like_donation_prefab_input_off': Blank_Like_Donation_Prefab_Input_Off // Рандом - лайк донатера с сообщением пользователю
     };
     
     const command: string | any = users_pk[id].operation;
@@ -133,6 +134,49 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
         ]
     ])
     await Send_Message(context, `✅ Мы зарегистрировали вашу жалобу на анкету #${blank_report_check.id}, спасибо за донос!`, keyboard)
+    users_pk[id].operation = ''
+    users_pk[id].text = ''
+    users_pk[id].id_target = null
+}
+
+async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
+    //console.log(context)
+    // проверям себя и свою анкету
+    const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_self) { return }
+    const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+    const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
+    if (!blank_self) { return }
+	await Online_Set(context)
+    let text_input = await Blank_Cleaner(users_pk[id].text)
+    if (text_input.length < 10) { return await Send_Message(context, `⚠ Сообщение от 10 символа надо!`); }
+    if (text_input.length > 3000) { return await Send_Message(context, `⚠ Сообщение до 3000 символов надо!`);  }
+    if (!users_pk[id].id_target) { return }
+    const blank_like_don_check = await prisma.blank.findFirst({ where: { id: Number(users_pk[id].id_target) } })
+    if (!blank_like_don_check) { return }
+
+    // проверяем наличие понравившегося пользователя и его анкеты
+    const blank_nice = await prisma.blank.findFirst({ where: { id: blank_like_don_check.id } })
+    if (!blank_nice) { return }
+    const user_nice = await prisma.account.findFirst({ where: { id: blank_nice.id_account } })
+    if (!user_nice) { return }
+    // проверяем анкету на просмотр и в случае чего делаем просмотренной
+    const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: blank_like_don_check.id }})
+    if (!blank_vision_check) { const blank_skip = await prisma.vision.create({ data: { id_account: user_self.id, id_blank: blank_like_don_check.id } }) }
+    
+    const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: blank_self.id ?? 0 }})
+    if (!mail_set) { return }
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то, загляните в почту.`) 
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `✉️ Получено приватное письмо от владельца анкеты #${user_self.id}: ${text_input}\n⚠ Чтобы отреагировать, загляните в почту и найдите анкету #${blank_self.id}.`)
+	await Logger(`(private chat) ~ clicked swipe with private message for <blank> #${blank_like_don_check.id} by <user> №${context.chat.id}`)
+    const keyboard = InlineKeyboard.keyboard([
+        [ 
+            InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } }),
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+        ]
+    ])
+    await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла, отправляем информацию об этом его/её владельцу вместе с приложением: ${text_input}`, keyboard)
     users_pk[id].operation = ''
     users_pk[id].text = ''
     users_pk[id].id_target = null

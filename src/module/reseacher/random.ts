@@ -47,10 +47,10 @@ export async function Random_Research(context: MessageContext) {
             InlineKeyboard.textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } }),
             InlineKeyboard.textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } })
         ],
-        (await Accessed(context) != `user`) ?
+        (user_check.donate == true) ?
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
-            InlineKeyboard.textButton({ text: '🛠✏ Направо', payload: { cmd: 'blank_like_donation' } })
+            InlineKeyboard.textButton({ text: '✏ Направо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
         ] :
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
@@ -146,5 +146,25 @@ export async function Blank_Report_Perfab_Input_ON(context: MessageContext, quer
 	users_pk[id].id_target = queryPayload.idb
 	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
     await Send_Message(context, `🧷 Введите причину жалобы от 10 до 2000 символов:`, /*blank.photo*/)
+    await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
+}
+
+export async function Blank_Like_Donation_Perfab_Input_ON(context: MessageContext, queryPayload: any) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+	const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	await Online_Set(context)
+	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
+    if (!blank_check) { return }
+    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
+    await User_Pk_Init(context)
+    const id = await User_Pk_Get(context)
+    if (id == null) { return }
+    users_pk[id].mode = 'input'
+    users_pk[id].operation = 'blank_like_donation_prefab_input_off'
+	users_pk[id].id_target = queryPayload.idb
+	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
+    await Send_Message(context, `🧷 Введите приватное сообщение пользователю от 10 до 3000 символов:`, /*blank.photo*/)
     await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
 }

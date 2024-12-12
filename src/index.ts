@@ -15,7 +15,7 @@ import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
-import { Blank_Like, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
+import { Blank_Like, Blank_Like_Donation_Perfab_Input_ON, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
 import { UnBanHammer } from './module/account/banhammer';
@@ -93,6 +93,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
 
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,
+        'blank_like_don': Blank_Like_Donation_Perfab_Input_ON, // 3 Поиск - Случайный донатерский рандом лайкаем анкету с приложением письма.
         'blank_unlike': Blank_Unlike, // 3 Поиск - Случайный рандом дизлайкаем анкетку конфетку
         'blank_report': Blank_Report, // 3 Поиск - Подтверждение ввода жалобы
         'blank_report_ION': Blank_Report_Perfab_Input_ON, // 3 Поиск - активация режима ввода жалобы
