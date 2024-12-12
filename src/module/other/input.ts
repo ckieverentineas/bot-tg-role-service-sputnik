@@ -4,6 +4,7 @@ import { Accessed, Blank_Cleaner, Logger, Online_Set, Send_Message, Send_Message
 import prisma from "../prisma";
 import { Censored_Activation_Pro } from "./censored";
 import { User_Pk_Get, User_Pk_Init } from "./pk_metr";
+import { Blank } from "@prisma/client";
 
 export async function Input_Module(context: any) {
     await User_Pk_Init(context)
@@ -22,7 +23,8 @@ export async function Input_Module(context: any) {
         "blank_create_prefab_input_off": Blank_Create_Prefab_Input_Off, // 1 Анкета - Сохранение анкеты
         'blank_edit_prefab_input_off': Blank_Edit_Prefab_Input_Off, // 1 Анкета - Изменение анкеты
         "blank_report_prefab_input_off": Blank_Report_Prefab_Input_Off, // 2 Рандом - жалоба на анкету
-        'blank_like_donation_prefab_input_off': Blank_Like_Donation_Prefab_Input_Off // Рандом - лайк донатера с сообщением пользователю
+        'blank_like_donation_prefab_input_off': Blank_Like_Donation_Prefab_Input_Off, // Рандом - лайк донатера с сообщением пользователю
+        'sniper_research_prefab_input_off': Sniper_Research_Prefab_Input_Off // Снайпер - Ввод номера анкеты
     };
     
     const command: string | any = users_pk[id].operation;
@@ -150,7 +152,7 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     if (!blank_self) { return }
 	await Online_Set(context)
     let text_input = await Blank_Cleaner(users_pk[id].text)
-    if (text_input.length < 10) { return await Send_Message(context, `⚠ Сообщение от 10 символа надо!`); }
+    if (text_input.length < 10) { return await Send_Message(context, `⚠ Сообщение от 10 символов надо!`); }
     if (text_input.length > 3000) { return await Send_Message(context, `⚠ Сообщение до 3000 символов надо!`);  }
     if (!users_pk[id].id_target) { return }
     const blank_like_don_check = await prisma.blank.findFirst({ where: { id: Number(users_pk[id].id_target) } })
@@ -168,7 +170,7 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: blank_self.id ?? 0 }})
     if (!mail_set) { return }
     await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то, загляните в почту.`) 
-    await Send_Message_NotSelf(Number(user_nice.idvk) , `✉️ Получено приватное письмо от владельца анкеты #${user_self.id}: ${text_input}\n⚠ Чтобы отреагировать, загляните в почту и найдите анкету #${blank_self.id}.`)
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `✉️ Получено приватное письмо от владельца анкеты #${blank_self.id}: ${text_input}\n⚠ Чтобы отреагировать, загляните в почту и найдите анкету #${blank_self.id}.`)
 	await Logger(`(private chat) ~ clicked swipe with private message for <blank> #${blank_like_don_check.id} by <user> №${context.chat.id}`)
     const keyboard = InlineKeyboard.keyboard([
         [ 
@@ -177,6 +179,61 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
         ]
     ])
     await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла, отправляем информацию об этом его/её владельцу вместе с приложением: ${text_input}`, keyboard)
+    users_pk[id].operation = ''
+    users_pk[id].text = ''
+    users_pk[id].id_target = null
+}
+
+async function Sniper_Research_Prefab_Input_Off(context: any, id: number) {
+    //console.log(context)
+    // проверям себя и свою анкету
+    const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_self) { return }
+    const banned_me = await User_Banned(context)
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+    const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
+    if (!blank_self) { return }
+	await Online_Set(context)
+    let text_input = await Blank_Cleaner(users_pk[id].text)
+    if (text_input.length < 1) { return await Send_Message(context, `⚠ Сообщение от 1 символов надо!`); }
+    if (text_input.length > 3000) { return await Send_Message(context, `⚠ Сообщение до 3000 символов надо!`);  }
+    
+    if (typeof Number(text_input) != "number") { return Send_Message(context, `⚠ Необходимо ввести число!`);}
+    const inputer = Math.floor(Number(text_input))
+    if (inputer < 0) { return await Send_Message(context, `⚠ Введите положительное число!`); }
+    if (Number.isNaN(inputer)) { return await Send_Message(context, `⚠ Не ну реально, ты дурак/дура или как? Число напиши нафиг!`); }
+
+    //if (!users_pk[id].id_target) { return }
+    const blank_sniper_check = await prisma.blank.findFirst({ where: { id: inputer, banned: false } })
+    const keyboard_end_blank_query = InlineKeyboard.keyboard([
+        [
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
+        ]
+    ])
+    if (!blank_sniper_check) { return await Send_Message(context, `⚠ Внимание, анкета не обнаружена!`, keyboard_end_blank_query);}
+    const selector: Blank = blank_sniper_check
+    const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
+    if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `) }
+    let censored = user_self.censored ? await Censored_Activation_Pro(selector.text) : selector.text
+    const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const keyboard = InlineKeyboard.keyboard([
+        [ 
+            InlineKeyboard.textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } }),
+            InlineKeyboard.textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } })
+        ],
+        (user_self.donate == true) ?
+        [
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
+            InlineKeyboard.textButton({ text: '✏ Направо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
+        ] :
+        [
+            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+        ],
+        [
+            InlineKeyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id } })
+        ]
+    ])
+    await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)
     users_pk[id].operation = ''
     users_pk[id].text = ''
     users_pk[id].id_target = null

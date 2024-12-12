@@ -37,7 +37,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } }).row()
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
-      .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_self' } }).row()
+      .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_research' } }).row()
     }
     if (await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })

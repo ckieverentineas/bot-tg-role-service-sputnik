@@ -21,6 +21,7 @@ import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/accou
 import { UnBanHammer } from './module/account/banhammer';
 import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseacher/archive';
 import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/account/statistics';
+import { Sniper_Research_Perfab_Input_ON } from './module/reseacher/sniper';
 
 
 dotenv.config();
@@ -115,6 +116,8 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'list_donate': List_Donate, // 6 Статистика - Список донатеров
         'list_ban': List_Ban, // 6 Статистика - Список забаненных
         'list_banhammer': List_Banhammer, // 6 Статистика - Список пользователей в черном списке пользователя
+
+        'sniper_research': Sniper_Research_Perfab_Input_ON // 3 Поиск - Режим Снайпера, ввод ид анкеты
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;
