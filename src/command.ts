@@ -2,7 +2,7 @@ import { HearManager } from "@puregram/hear";
 import { InlineKeyboard, InlineKeyboardBuilder, KeyboardBuilder, MessageContext } from "puregram";
 import prisma from "./module/prisma";
 import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf } from "./module/helper";
-import { root } from ".";
+import { chat_id_moderate, root } from ".";
 import { Account } from "@prisma/client";
 
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
@@ -58,6 +58,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       const lvlup = await prisma.account.update({ where: { id: user.id }, data: { id_role: 2 } })
       if (lvlup) {
           await Send_Message(context, `⚙ Рут права получены`)
+          await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 Super user @${lvlup.username} got root`)
           await Logger(`Super user ${context.chat.id} got root`)
       } else {
           await Send_Message(context, `⚙ Ошибка`)
@@ -92,6 +93,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       const login = await prisma.account.update({ where: { id: account_check.id }, data: { id_role: account_check.id_role == 1 ? 2 : 1 } })
       await Send_Message(context, `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.id_role == 2 ? 'добавлены в лист администраторов' : 'убраны из листа администраторов'}`)
+      await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
 			await Logger(`(private chat) ~ changed role <${login.id_role == 2 ? 'admin' : 'user'}> for #${login.idvk} by <admin> №${context.chat.id}`)
     }
   })
@@ -111,6 +113,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       const login = await prisma.account.update({ where: { id: account_check.id }, data: { banned: account_check.banned ? false : true } })
       await Send_Message(context, `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.banned ? 'добавлены в лист забаненных' : 'убраны из листа забаненных'}`)
+      await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
 			await Logger(`(private chat) ~ banned status changed <${login.banned ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
       const blank_block = await prisma.blank.findFirst({ where: { id_account: login.id } })
       if (!blank_block) { return await Send_Message(context, `⌛ У ламината не было анкеты!`)}
@@ -161,6 +164,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       const login = await prisma.account.update({ where: { id: account_check.id }, data: { donate: account_check.donate ? false : true } })
       await Send_Message(context, `🔧 @${login.username} ${login.donate ? 'добавлен в лист донатеров' : 'убран из листа донатеров'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.donate ? 'добавлены в лист донатеров' : 'убраны из листа донатеров'}`)
+      await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.donate ? 'добавлен в лист донатеров' : 'убран из листа донатеров'}`)
 			await Logger(`(private chat) ~ donate status changed <${login.donate ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
     }
   })

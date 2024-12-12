@@ -3,6 +3,7 @@ import prisma from "../prisma"
 import { Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper"
 import { Mail } from "@prisma/client"
 import { Censored_Activation_Pro } from "../other/censored"
+import { chat_id_system } from "../.."
 
 export async function Mail_Self(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
@@ -77,6 +78,8 @@ export async function Mail_Like(context: MessageContext, queryPayload: any) {
     const mail_skip = await prisma.mail.update({ where: { id: queryPayload.idm }, data: { read: true, status: true } })
     await Send_Message(context, `🔊 Недавно вам понравилась анкета #${blank_nice.id}, знайте, что это взаимно на вашу анкету #${blank_self.id}.\n Скорее пишите друг другу в личные сообщения и ловите флешбеки вместе, станьте врагами уже сегодня с @${user_nice.username}!`)
     await Send_Message_NotSelf(Number(user_nice.idvk), `🔊 Недавно вам понравилась анкета #${blank_self.id}, знайте, что это взаимно на вашу анкету #${blank_nice.id}.\n Скорее пишите друг другу в личные сообщения и ловите флешбеки вместе, станьте врагами уже сегодня с @${user_self.username}!`)
+    const ans_selector = `🌐 Анкеты №${blank_nice.id} + №${blank_self.id} = [ролевики никогда]!`
+    await Send_Message_NotSelf(Number(chat_id_system), ans_selector)
     await Logger(`(private chat) ~ clicked like for <blank> #${blank_nice.id} by <user> №${context.senderId}`)
     await Mail_Self(context)
 }

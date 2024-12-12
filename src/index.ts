@@ -10,7 +10,7 @@ import { Denied_Processing_Of_Personal_Data, Success_Processing_Of_Personal_Data
 import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
-import { Logger, Online_Set, Send_Message, Sleep } from './module/helper';
+import { Blank_Inactivity, Logger, Online_Set, Send_Message, Sleep, Worker_Checker } from './module/helper';
 import { Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
@@ -29,7 +29,10 @@ dotenv.config();
 // Загрузка из .env, задание параметров
 const token: any = process.env.TOKEN;
 export const root = process.env.ROOT;
+export const chat_id_system = process.env.chat_id_system;
+export const chat_id_moderate = process.env.chat_id_moderate;
 export const telegram = Telegram.fromToken(token)
+export const starting_date = new Date(); // запись времени работы бота
 const questionManager = new QuestionManager();
 //telegram.updates.use(questionManager.middleware);
 const hearManager = new HearManager()
@@ -40,9 +43,10 @@ commandUserRoutes(hearManager)
 export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string, id_target: number | null }> = []
 
 telegram.updates.on('message', async (context: MessageContext) => {
+    //console.log(context)
     if (context.chat.id < 0) { return }
     // Проверяем, является ли сообщение текстовым
-    //console.log(context)
+    
     
 	//await vk.api.messages.send({ peer_id: 463031671, random_id: 0, message: `тест2`, attachment: `photo200840769_457273112` } )
 	//Модуль вызова пкметра
@@ -154,6 +158,10 @@ try {
 telegram.updates.startPolling().then(async () => {
     await Logger(`@${telegram.bot.username} started polling`)
 })
+
+//запускаем раз в сутки выдачу времени
+setInterval(Worker_Checker, 86400000);
+setInterval(Blank_Inactivity, 86400000);
 /*
 telegram.updates.on('message', async (msg: any) => {
     // Создаем клавиатуру

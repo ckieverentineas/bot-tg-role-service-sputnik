@@ -1,8 +1,8 @@
 import { Context, Markup } from "telegraf";
 import prisma from "../prisma";
 import { InlineKeyboard, KeyboardBuilder, MessageContext } from "puregram";
-import { telegram } from "../..";
-import { Logger, Send_Message } from "../helper";
+import { chat_id_system, telegram } from "../..";
+import { Logger, Send_Message, Send_Message_NotSelf } from "../helper";
 //import { Keyboard_Index, Logger, Send_Message, User_Info } from "./helper";
 
 export async function User_Registration(context: MessageContext) {
@@ -74,6 +74,8 @@ export async function Success_Processing_Of_Personal_Data(message: MessageContex
     
     const save = await prisma.account.create({	data: {	idvk: message.chat.id, username: message.chat?.username } })
     await Send_Message(message, `⌛ Хранитель вас увидел и сказал:\n — Добро пожаловать в Распутник! \n ⚖Вы зарегистрировались в системе, ${message.chat.firstName}\n 🕯 GUID: ${save.id}. \n 🎥 idtg: ${save.idvk}\n ⚰ Дата Регистрации: ${save.crdate}\n`)
+    const ans_selector = `⁉ @${save.username} легально регистрируется в Спутнике под GUID: ${save.id}!`
+    await Send_Message_NotSelf(Number(chat_id_system), ans_selector)
     await Logger(`In database created new user with uid [${save.id}] and idtg [${save.idvk}]`)
     //const ans_selector = `⁉ @id${save.idvk}(${info.first_name}) легально регистрируется в Спутнике под GUID: ${save.id}!`
     //await Send_Message(chat_id, ans_selector)

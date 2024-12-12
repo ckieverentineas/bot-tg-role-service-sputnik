@@ -1,5 +1,5 @@
 import { InlineKeyboard } from "puregram";
-import { users_pk } from "../..";
+import { chat_id_moderate, users_pk } from "../..";
 import { Accessed, Blank_Cleaner, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
 import prisma from "../prisma";
 import { Censored_Activation_Pro } from "./censored";
@@ -126,6 +126,7 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
     if (counter_warn >= 3) {
         await prisma.blank.update({ where: { id: blank_report_check.id }, data: { banned: true } })
         await Send_Message_NotSelf(Number(user_warn.idvk), `🚫 На вашу анкету #${blank_report_check.id} донесли крысы ${counter_warn}/3. Изымаем анкету из поиска до разбирательства модераторами.`)
+        await Send_Message_NotSelf(Number(chat_id_moderate), `⚠ Анкета #${blank_report_check.id} изъята из поиска из-за жалоб, модераторы, примите меры!`)
     }
     const blank_report_check_vision = await prisma.vision.findFirst({ where: { id_account: user_check.id, id_blank: blank_report_check.id }})
     if (!blank_report_check_vision) { const blank_skip = await prisma.vision.create({ data: { id_account: user_check.id, id_blank: blank_report_check.id } }) }
@@ -136,6 +137,7 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
         ]
     ])
     await Send_Message(context, `✅ Мы зарегистрировали вашу жалобу на анкету #${blank_report_check.id}, спасибо за донос!`, keyboard)
+    await Send_Message_NotSelf(Number(chat_id_moderate), `🧨 На анкету #${blank_report_check.id} кто-то донес до модератора следующее: [${report_set.text}]!\n⚠ Жалоб: ${counter_warn}/3.`)
     users_pk[id].operation = ''
     users_pk[id].text = ''
     users_pk[id].id_target = null
@@ -171,7 +173,8 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     if (!mail_set) { return }
     await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то, загляните в почту.`) 
     await Send_Message_NotSelf(Number(user_nice.idvk) , `✉️ Получено приватное письмо от владельца анкеты #${blank_self.id}: ${text_input}\n⚠ Чтобы отреагировать, загляните в почту и найдите анкету #${blank_self.id}.`)
-	await Logger(`(private chat) ~ clicked swipe with private message for <blank> #${blank_like_don_check.id} by <user> №${context.chat.id}`)
+	await Send_Message_NotSelf(Number(chat_id_moderate), `⚖️ #${blank_self.id} --> ${text_input} --> #${blank_nice.id}`)
+    await Logger(`(private chat) ~ clicked swipe with private message for <blank> #${blank_like_don_check.id} by <user> №${context.chat.id}`)
     const keyboard = InlineKeyboard.keyboard([
         [ 
             InlineKeyboard.textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } }),
