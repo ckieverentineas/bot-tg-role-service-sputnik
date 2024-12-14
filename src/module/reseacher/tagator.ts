@@ -25,6 +25,9 @@ export async function Tagator_Research(context: MessageContext) {
     if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
     await Online_Set(context)
     let blank_build = null
+    const tag_self_like = user_check.tag_like != null ? JSON.parse(user_check.tag_like ?? []) : []
+    if (tag_self_like.length < 1) { return await Send_Message(context, `Настройте теги, по которым будем искать`) }
+    const tag_self_unlike = user_check.tag_unlike != null ? JSON.parse(user_check.tag_unlike ?? []) : []
     for (const blank of await prisma.$queryRaw<Blank[]>`SELECT * FROM Blank WHERE banned = false ORDER BY random() ASC`) {
         if (blank.id_account == user_check.id) { continue }
         const vision_check = await prisma.vision.findFirst({ where: { id_blank: blank.id, id_account: user_check.id } })
@@ -36,8 +39,27 @@ export async function Tagator_Research(context: MessageContext) {
         // если автор анкеты добавил меня в черном списке, то пропускаем
         const black_list_other = await prisma.blackList.findFirst({ where: { id_account: user_bl_ch?.id ?? 0, idvk: Number(user_check.idvk) } })
         if (black_list_other) { continue }
-        blank_build = blank
-        break
+        // тегосверка
+        const tag_blank_pull = blank.tag != null ? JSON.parse(blank.tag ?? []) : []
+        if (tag_blank_pull == null || tag_blank_pull.length < 1) { continue }
+        // исключаем анкету с не понравившимися тегами
+        let tr_unlike_blank = false
+        for (const tag_s_un of tag_self_unlike) {
+            if (tag_blank_pull.includes(tag_s_un)) {
+                tr_unlike_blank = true
+                break
+            }
+        }
+        if (tr_unlike_blank) { continue }
+        let tr_like_blank = false
+        for (const tag_s_l of tag_self_like) {
+            if (tag_blank_pull.includes(tag_s_l)) {
+                tr_like_blank = true
+                blank_build = blank
+                break
+            }
+        }
+        if (tr_like_blank) { break }
     }
     await Logger(`(private chat) ~ starting check random blank by <user> №${context.senderId}`)
     const keyboard_end_blank_query = InlineKeyboard.keyboard([
@@ -45,7 +67,7 @@ export async function Tagator_Research(context: MessageContext) {
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
         ]
     ])
-    if (!blank_build) { return await Send_Message(context, `😿 Очередь анкет закончилась, попробуйте вызвать 🎲 рандом позже.`, keyboard_end_blank_query) }
+    if (!blank_build) { return await Send_Message(context, `😿 Очередь пустая, попробуйте использовать другие теги, или исключить исключаемые теги.`, keyboard_end_blank_query) }
     const selector: Blank = blank_build
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `) }
@@ -53,19 +75,19 @@ export async function Tagator_Research(context: MessageContext) {
     const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = InlineKeyboard.keyboard([
         [ 
-            InlineKeyboard.textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } }),
-            InlineKeyboard.textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } })
+            InlineKeyboard.textButton({ text: '⛔ Налево', payload: { cmd: 'tagator_unlike', idb: selector.id } }),
+            InlineKeyboard.textButton({ text: `✅ Направо`, payload: { cmd: 'tagator_like', idb: selector.id } })
         ],
         (user_check.donate == true) ?
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
-            InlineKeyboard.textButton({ text: '✏ Направо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
+            InlineKeyboard.textButton({ text: '‼✏ Направо', payload: { cmd: 'tagator_like_don', idb: selector.id  } })
         ] :
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
         ],
         [
-            InlineKeyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id } })
+            InlineKeyboard.textButton({ text: '‼⚠ Жалоба', payload: { cmd: 'tagator_report', idb: selector.id } })
         ]
     ])
     await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)
