@@ -22,6 +22,7 @@ import { UnBanHammer } from './module/account/banhammer';
 import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseacher/archive';
 import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/account/statistics';
 import { Sniper_Research_Perfab_Input_ON } from './module/reseacher/sniper';
+import { Tagator_Menu, Tagator_Research_Config_Like, Tagator_Research_Config_Unlike } from './module/reseacher/tagator';
 
 
 dotenv.config();
@@ -86,6 +87,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
 
         'main_menu': Main_Menu, // 0 Меню - системное
+        'tagator_menu': Tagator_Menu, // 0 Меню - поисковое меню для тегатора-3000
         'unbanhammer': UnBanHammer, // Банхаммер - амнистия
 
         'blank_self': Blank_Self, // 2 Анкета - Главное меню
@@ -122,6 +124,8 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'sniper_research': Sniper_Research_Perfab_Input_ON, // 3 Поиск - Режим Снайпера, ввод ид анкеты
 
         'tagator_blank_config': Tagator_Blank_Config, // 7 Тегатор - настройка тегов для анкеты
+        'tagator_research_config_like': Tagator_Research_Config_Like, // 7 Тегатор - настройка тегов для поиска нужных анкет
+        'tagator_research_config_unlike': Tagator_Research_Config_Unlike, // 7 Тегатор - настройка тегов для исключения из поиска ненужных анкет
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;

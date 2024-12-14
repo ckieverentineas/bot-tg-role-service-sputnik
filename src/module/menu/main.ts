@@ -12,7 +12,7 @@ export async function Main_Menu(context: MessageContext) {
     .textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } })
     .textButton({ text: `${mail_check ? '📬' : '📪'} Почта`, payload: { cmd: 'mail_self' } }).row()
     .textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } })
-    .textButton({ text: '🛠🌐 Тегатор', payload: { cmd: 'browser_research' } }).row()
+    .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_menu' } }).row()
     .textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } })
     .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } }).row()
     if (user_check.donate || await Accessed(context) != `user`) {
