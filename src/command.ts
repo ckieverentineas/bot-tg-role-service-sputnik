@@ -1,8 +1,8 @@
 import { HearManager } from "@puregram/hear";
-import { InlineKeyboard, InlineKeyboardBuilder, KeyboardBuilder, MessageContext } from "puregram";
+import { InlineKeyboard, InlineKeyboardBuilder, KeyboardBuilder, MediaSourceType, MessageContext} from "puregram";
 import prisma from "./module/prisma";
 import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf } from "./module/helper";
-import { chat_id_moderate, root } from ".";
+import { chat_id_moderate, chat_id_system, root, telegram } from ".";
 import { Account } from "@prisma/client";
 
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
@@ -23,7 +23,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
   // главное меню
   hearManager.hear(/!спутник|!Спутник|\/sputnik/, async (context: any) => {
     if (context.chat.id < 0) { return }
-    const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     await Online_Set(context)
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
@@ -168,4 +168,94 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
 			await Logger(`(private chat) ~ donate status changed <${login.donate ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
     }
   })
+  hearManager.hear(/!тест/, async (context: MessageContext) => {
+    if (context.chat.id < 0) { return }
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
+    if (!user_check) { return }
+    await Online_Set(context)
+    const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
+    const mail_check = await prisma.mail.findFirst({ where: {  blank_to: blank_check?.id ?? 0, read: false, find: true } })
+    const keyboard = new InlineKeyboardBuilder()
+    .textButton({ text: '#фандом', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#ориджинал', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#научная_фантастика', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#фантастика', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#фэнтези', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#приключения', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#военное', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#историческое', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#детектив', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#криминал', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#экшен', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#ужасы', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#драма', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#мистика', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#психология', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#повседневность', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#романтика', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#долговременная_игра', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#фурри', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#омегаверс', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#постельные_сцены', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#перепихон', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#14+', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#16+', payload: { cmd: 'tagator_config' } })//.row()
+    .textButton({ text: '#18+', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#18++', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#мск/мск-1', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#мск+1/2/3', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#мск+4/5/6', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#мск+7/8/9', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#многострочник', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#среднестрочник', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#малострочник', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#разнострочник', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#реал', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#внеролевое_общение', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: '#литературный_стиль', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#полурол', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#джен', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#гет', payload: { cmd: 'tagator_config' } })//.row()
+    .textButton({ text: '#слэш', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#фемслэш', payload: { cmd: 'tagator_config' } }).row()
+
+    .textButton({ text: '#актив', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#пассив', payload: { cmd: 'tagator_config' } })
+    .textButton({ text: '#универсал', payload: { cmd: 'tagator_config' } }).row()
+    .textButton({ text: 'ckrckr', payload: { cmd: 'tagator_config' } }).row()
+    await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
+    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+  })
+  /*
+  hearManager.hear(/!фото/, async (context: any) => {
+    console.log(context)
+    if (context.chat.id < 0) { return }
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.senderId } })
+    if (!user_check) { return }
+    await Online_Set(context)
+    await telegram.api.sendPhoto({ chat_id: context.chat.id, photo: context!.attachment.bigSize.fileId, caption: `Здесь мог быть тройничок`})
+    await telegram.api.sendPhoto({ chat_id: String(chat_id_moderate), photo: context!.attachment.bigSize.fileId, caption: `Здесь мог быть тройничок`})
+   //await context.sendPhoto(`${}`)
+
+    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+  })
+  */
+
+  hearManager.hear(/!енотик/, async (context: MessageContext) => {
+		if (context.chat.id < 0) { return }
+		const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+		if (!user_check) { return }
+    if (context.chat.id != Number(root) && user_check.id_role != 2) { return }
+		await Online_Set(context)
+    await telegram.api.sendDocument( {chat_id: context.chat.id, document: {value: './prisma/sputnik-tg.db', type: MediaSourceType.Path }, caption: '💡 Открывать на сайте: https://sqliteonline.com/' } );
+    await Send_Message_NotSelf(Number(chat_id_system), `‼ @${user_check.username}(Admin) делает бекап баз данных dev.db.`)
+    await Logger(`In private chat, did backup database by admin ${context.senderId}`)
+    })
 }
