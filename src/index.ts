@@ -12,7 +12,7 @@ import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Blank_Inactivity, Logger, Online_Set, Send_Message, Sleep, Worker_Checker } from './module/helper';
 import { Main_Menu } from './module/menu/main';
-import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change, Tagator_Blank_Config } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
 import { Blank_Like, Blank_Like_Donation_Perfab_Input_ON, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
@@ -74,8 +74,6 @@ telegram.updates.on('message', async (context: MessageContext) => {
 
 // Обработка нажатий на инлайн-кнопки
 telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
-    
-    //console.log(context)
     const { message }= query;
     const queryPayload: any = query.queryPayload
 
@@ -121,7 +119,9 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'list_ban': List_Ban, // 6 Статистика - Список забаненных
         'list_banhammer': List_Banhammer, // 6 Статистика - Список пользователей в черном списке пользователя
 
-        'sniper_research': Sniper_Research_Perfab_Input_ON // 3 Поиск - Режим Снайпера, ввод ид анкеты
+        'sniper_research': Sniper_Research_Perfab_Input_ON, // 3 Поиск - Режим Снайпера, ввод ид анкеты
+
+        'tagator_blank_config': Tagator_Blank_Config, // 7 Тегатор - настройка тегов для анкеты
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;

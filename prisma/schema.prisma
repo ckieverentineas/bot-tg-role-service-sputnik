@@ -12,6 +12,8 @@ model Account {
   id       Int      @id @default(autoincrement())
   idvk     BigInt
   username String?
+  tag_like String?
+  tag_unlike String?
   id_role  Int      @default(1)
   censored Boolean  @default(true)
   banned   Boolean  @default(false)
@@ -34,6 +36,7 @@ model Blank {
   id         Int      @id @default(autoincrement())
   text       String
   photo      String   @default("")
+  tag        String?
   id_account Int
   account    Account  @relation(fields: [id_account], references: [id], onDelete: Cascade)
   banned     Boolean  @default(false)
