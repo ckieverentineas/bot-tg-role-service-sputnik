@@ -13,20 +13,15 @@ export async function Blank_Self(context: MessageContext) {
 	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
-    const keyboard = InlineKeyboard.keyboard([
-        (blank_check) ?
-        [
-          InlineKeyboard.textButton({ text: '⛔ Удалить', payload: { cmd: 'blank_delete' } }),
-          InlineKeyboard.textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }),
-          InlineKeyboard.textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
-        ] :
-        [
-          InlineKeyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
-        ],
-        [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-        ]
-    ])
+    const keyboard = new InlineKeyboardBuilder()
+    if (blank_check) { 
+        keyboard.textButton({ text: '⛔ Удалить', payload: { cmd: 'blank_delete' } })
+        .textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }).row()
+        .textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
+    } else {
+        keyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
+    }
+    keyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     let answer = ''
 	if (!blank_check) {
 		await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)

@@ -20,7 +20,7 @@ export async function Main_Menu(context: MessageContext) {
       .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_research' } }).row()
     }
     if (await Accessed(context) != `user`) {
-      keyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderation_mode' } })
+      keyboard.textButton({ text: '⚖ Модерация', payload: { cmd: 'moderate_self' } })
       keyboard.textButton({ text: '📊 Забаненные', payload: { cmd: 'list_ban' } }).row()
       keyboard.textButton({ text: '📊 Донатеры', payload: { cmd: 'list_donate' } })
       keyboard.textButton({ text: '📊 Админы', payload: { cmd: 'list_admin' } }).row()

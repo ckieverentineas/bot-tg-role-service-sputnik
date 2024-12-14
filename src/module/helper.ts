@@ -1,7 +1,8 @@
-import { MessageContext } from "puregram";
+import { InlineKeyboardBuilder, MessageContext } from "puregram";
 import { chat_id_system, starting_date, telegram } from "..";
 import { Account } from "@prisma/client";
 import prisma from "./prisma";
+import { keyboard_back } from "./datacenter/tag";
 
 export async function Logger(text: String) {
     const project_name = `Sputnik TG`
@@ -120,4 +121,59 @@ export async function Blank_Inactivity() {
         }
     }
     await Logger(`(system) ~ complete clear blanks inactivity by <system> №0`)
+}
+
+export async function Verify_User(context: MessageContext) {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { 
+        await Send_Message(context, `💔 Ваш аккаунт не зарегистрирован, напишите начать.`)
+        return false 
+    }
+    const banned_me = await User_Banned(context)
+    if (banned_me) { 
+        await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`, keyboard_back) 
+        return false
+    }
+    const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
+    if (!blank_check) { 
+        const keyboard_blank = new InlineKeyboardBuilder().textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } })
+        await Send_Message(context, `⚠ Создайте анкету, вызовите [!спутник] и нажмите [📃 Моя анкета]`, keyboard_blank) 
+        return false
+    }
+    if (blank_check.banned) { 
+        await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`, keyboard_back) 
+        return false
+    }
+    await Online_Set(context)
+    await Username_Verify(context)
+    return { user_check, blank_check }
+}
+
+export async function Username_Verify(context: MessageContext) {
+    if (context.chat.id > 0) {
+        const user = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+        if (context.chat.username != user?.username) {
+            const save = await prisma.account.update({	where: { id: user!.id }, data: { username: context.chat?.username } })
+            await Send_Message(context, `Ваш юзернейм изменился с ${user?.username} на ${save?.username}`)
+        }
+    }
+}
+
+export async function Verify_Blank_Not_Self(context: MessageContext, id_blank: number) {
+    const blank_nice = await prisma.blank.findFirst({ where: { id: id_blank } })
+    if (!blank_nice) { 
+        await Send_Message(context, `⚠ Анкета #${id_blank} не найдена`, keyboard_back) 
+        return false
+    }
+    const user_nice = await prisma.account.findFirst({ where: { id: blank_nice.id_account } })
+    if (!user_nice) { 
+        await Send_Message(context, `⚠ Владелец анкеты #${id_blank} не найден`, keyboard_back)
+        return false 
+    }
+    return { user_nice, blank_nice }
+}
+
+export async function Blank_Vision_Activity(context: MessageContext, id_blank: number, user_self: Account) {
+    const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: id_blank }})
+	if (!blank_vision_check) { await prisma.vision.create({ data: { id_account: user_self.id, id_blank: id_blank } }) }
 }

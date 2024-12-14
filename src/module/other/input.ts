@@ -1,4 +1,4 @@
-import { InlineKeyboard } from "puregram";
+import { InlineKeyboard, InlineKeyboardBuilder } from "puregram";
 import { chat_id_moderate, users_pk } from "../..";
 import { Accessed, Blank_Cleaner, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
 import prisma from "../prisma";
@@ -45,7 +45,7 @@ export async function Input_Module(context: any) {
 }
 
 async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
-    console.log(context)
+    //console.log(context)
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
@@ -58,12 +58,7 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     await Logger(`(private chat) ~ starting creation self blank by <user> №${context.senderId}`)
     await Send_Message(context, `⚠ В анкете зарегистрировано ${text_input.length} из ${users_pk[id].text.length} введенных вами символов.`)
     const save = await prisma.blank.create({ data: { text: text_input, id_account: user_check.id } })
-    const keyboard = InlineKeyboard.keyboard([
-        [ 
-            InlineKeyboard.textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } }),
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-        ]
-      ])
+    const keyboard = new InlineKeyboardBuilder().textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
 	await Send_Message(context, `🔧 Вы успешно создали анкетку-конфетку под UID: ${save.id}\n${save.text}`, keyboard)
     users_pk[id].operation = ''
     users_pk[id].text = ''

@@ -1,3 +1,5 @@
+import { InlineKeyboardBuilder } from "puregram";
+
 export const tag_list = [
     { id: 1, text: '#фандом' },
     { id: 2, text: '#ориджинал' },
@@ -50,3 +52,5 @@ export async function getTagById(id: number | string): Promise<string | undefine
     const button = tag_list.find(button => button.id === Number(id));
     return button ? button.text : undefined;
 }
+
+export const keyboard_back = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })

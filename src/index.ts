@@ -23,6 +23,7 @@ import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseach
 import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/account/statistics';
 import { Sniper_Research_Perfab_Input_ON } from './module/reseacher/sniper';
 import { Tagator_Like, Tagator_Menu, Tagator_Research, Tagator_Research_Config_Like, Tagator_Research_Config_Unlike, Tagator_Unlike } from './module/reseacher/tagator';
+import { Bot } from './module/ai/speak';
 
 
 dotenv.config();
@@ -39,6 +40,7 @@ const questionManager = new QuestionManager();
 const hearManager = new HearManager()
 telegram.updates.on('message', hearManager.middleware)
 commandUserRoutes(hearManager)
+const bot = new Bot();
 
 // хранилище для пкметра и режимов
 export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string, id_target: number | null }> = []
@@ -70,6 +72,9 @@ telegram.updates.on('message', async (context: MessageContext) => {
         }
     }
 	await Online_Set(context)
+    await bot.addMessage(context.text || 'zero');
+    const ans = await bot.generateResponse(10);
+    await Send_Message(context,`${ans}`)
 	return;
 });
 
