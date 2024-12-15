@@ -35,7 +35,7 @@ export async function Random_Research(context: MessageContext) {
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `, keyboard_back) }
     let censored = user_check.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const text = `🛰️ Поисковой режим «Рандом-2000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } })
     .textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
@@ -99,7 +99,7 @@ export async function Blank_Report(context: MessageContext, queryPayload: any) {
     .textButton({ text: '✏ Ввести жалобу', payload: { cmd: 'blank_report_ION', idb: blank_report.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'random_research' } })
     // подтверждаем готовность ввода жалобы
-    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность, нажав кнопку ✏ Ввести жалобу`, keyboard)
+    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность, нажав кнопку [✏ Ввести жалобу]`, keyboard)
     await Logger(`(research random) ~ show prefab for report on <blank> #${blank_report.id} by @${user_self.username}`)
 }
 
@@ -119,8 +119,8 @@ export async function Blank_Report_Perfab_Input_ON(context: MessageContext, quer
     users_pk[id].mode = 'input'
     users_pk[id].operation = 'blank_report_prefab_input_off'
 	users_pk[id].id_target = queryPayload.idb
-    await Send_Message(context, `🧷 Введите причину жалобы от 10 до 2000 символов:`, /*blank.photo*/)
-    await Logger(`(research random) ~ starting write report report on <blank> #${queryPayload.idb} by @${user_self.username}`)
+    await Send_Message(context, `🧷 Введите причину жалобы от 10 до 2000 символов:`)
+    await Logger(`(research random) ~ starting write report on <blank> #${queryPayload.idb} by @${user_self.username}`)
 }
 
 export async function Blank_Like_Donation_Perfab_Input_ON(context: MessageContext, queryPayload: any) {
@@ -136,7 +136,6 @@ export async function Blank_Like_Donation_Perfab_Input_ON(context: MessageContex
     users_pk[id].mode = 'input'
     users_pk[id].operation = 'blank_like_donation_prefab_input_off'
 	users_pk[id].id_target = queryPayload.idb
-	await Logger(`(private chat) ~ starting creation self blank by <user> №${context.chat.id}`)
-    await Send_Message(context, `🧷 Введите приватное сообщение пользователю от 10 до 3000 символов:`, /*blank.photo*/)
+    await Send_Message(context, `🧷 Введите приватное сообщение пользователю от 10 до 3000 символов:`)
     await Logger(`(research random) ~ starting write message for donation like on <blank> #${queryPayload.idb} by @${user_self.username}`)
 }

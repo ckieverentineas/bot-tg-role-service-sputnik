@@ -1,20 +1,19 @@
-import { InlineKeyboard, MessageContext } from "puregram";
+import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
 import prisma from "../prisma";
-import { Accessed, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned } from "../helper";
+import { Accessed, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Verify_Blank_Not_Self, Verify_User } from "../helper";
 import { Censored_Activation_Pro } from "../other/censored";
 import { telegram, users_pk } from "../..";
 import { User_Pk_Get, User_Pk_Init } from "../other/pk_metr";
 import { Blank } from "@prisma/client";
+import { keyboard_back } from "../datacenter/tag";
 
 export async function Archive_Research(context: MessageContext) {
-    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-    if (!user_check) { return }
-    const banned_me = await User_Banned(context)
-    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
-    const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
-    if (!blank_check) { return await Send_Message(context, `⚠ Создайте анкету`) }
-    if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
-    await Online_Set(context)
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_check = user_verify.user_check
+    const blank_check = user_verify.blank_check
+    // подбираем случайную анкету из уже просмотренных
     let blank_build = null
     for (const blank of await prisma.$queryRaw<Blank[]>`SELECT * FROM Blank WHERE banned = false ORDER BY random() ASC`) {
         if (blank.id_account == user_check.id) { continue }
@@ -30,69 +29,52 @@ export async function Archive_Research(context: MessageContext) {
         blank_build = blank
         break
     }
-
-    await Logger(`(private chat) ~ starting check acrhive blank by <user> №${context.senderId}`)
-    const keyboard_end_blank_query = InlineKeyboard.keyboard([
-        [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
-        ]
-    ])
-    if (!blank_build) { return await Send_Message(context, `😿 Очередь анкет закончилась, попробуйте вызвать архивариус позже.`, keyboard_end_blank_query) }
+    if (!blank_build) { return await Send_Message(context, `😿 Очередь анкет закончилась, попробуйте вызвать архивариус позже.`, keyboard_back) }
+    // формируем меню для найденной анкеты
     const selector: Blank = blank_build
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `) }
     let censored = user_check.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
-    const keyboard = InlineKeyboard.keyboard([
-        [ 
-            InlineKeyboard.textButton({ text: '⛔ Налево', payload: { cmd: 'archive_unlike', idb: selector.id } }),
-            InlineKeyboard.textButton({ text: `✅ Направо`, payload: { cmd: 'archive_like', idb: selector.id } })
-        ],
-        (await Accessed(context) != `user`) ?
-        [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),
-            InlineKeyboard.textButton({ text: '🛠✏ Направо', payload: { cmd: 'archive_like_donation' } })
-        ] :
-        [
-            InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-        ]
-    ])
-    await Send_Message(context, `${text}`, keyboard, /*blank.photo*/)
+    const text = `🛰️ Поисковой режим «Архив-1000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const keyboard = new InlineKeyboardBuilder()
+    .textButton({ text: '⛔ Налево', payload: { cmd: 'archive_unlike', idb: selector.id } })
+    .textButton({ text: `✅ Направо`, payload: { cmd: 'archive_like', idb: selector.id } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    //if (await Accessed(context) != `user`) { keyboard.textButton({ text: '🛠✏ Направо', payload: { cmd: 'archive_like_donation' } }) }
+    await Send_Message(context, `${text}`, keyboard)
+    await Logger(`(research archive) ~ show <blank> #${selector.id} for @${user_check.username}`)
 }
 
 export async function Archive_Like(context: MessageContext, queryPayload: any) {
-    
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_self = user_verify.user_check
+    const blank_self = user_verify.blank_check
     // проверяем наличие понравившегося пользователя и его анкеты
-    const blank_nice = await prisma.blank.findFirst({ where: { id: queryPayload.idb } })
-    if (!blank_nice) { return }
-    const user_nice = await prisma.account.findFirst({ where: { id: blank_nice.id_account } })
-    if (!user_nice) { return }
-    // проверям себя и свою анкету
-    const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-    if (!user_self) { return }
-    const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
-    if (!blank_self) { return }
-    // проверяем анкету на просмотр и в случае чего делаем просмотренной
-    /*const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: queryPayload.idb }})
-	if (!blank_vision_check) { const blank_skip = await prisma.vision.create({ data: { id_account: user_self.id, id_blank: queryPayload.idb } }) }*/
+    const blank_verify = await Verify_Blank_Not_Self(context, queryPayload.idb)
+    if (!blank_verify) { return }
+    const user_nice = blank_verify.user_nice
+    const blank_nice = blank_verify.blank_nice
+    // помечаем анкету просмотренной
+    await Blank_Vision_Activity(context, queryPayload.idb, user_self)
 	await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла в архивариусе, отправляем информацию об этом его/её владельцу.`)
 	const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: blank_self.id ?? 0 }})
 	if (!mail_set) { return }
     await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Вашу анкету #${blank_nice.id} кто-то достал из архива и лайкнул, загляните в почту.`) 
-	await Logger(`(private chat) ~ clicked swipe for <blank> #${blank_nice.id} by <user> №${context.chat.id}`)
+	await Logger(`(research archive) ~ clicked swipe <blank> #${blank_nice.id} for @${user_self.username}`)
     await Archive_Research(context)
 }
 
 export async function Archive_Unlike(context: MessageContext, queryPayload: any) {
-    // проверям себя и свою анкету
-    const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
-    if (!user_self) { return }
-    const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
-    if (!blank_self) { return }
-    // проверяем анкету на просмотр и в случае чего делаем просмотренной
-    /*const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: queryPayload.idb }})
-	if (!blank_vision_check) { const blank_skip = await prisma.vision.create({ data: { id_account: user_self.id, id_blank: queryPayload.idb } }) }*/
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_self = user_verify.user_check
+    //const blank_self = user_verify.blank_check
+    // помечаем анкету просмотренной
+    await Blank_Vision_Activity(context, queryPayload.idb, user_self)
     await Send_Message(context, `✅ Пропускаем анкету #${queryPayload.idb} в архивариусе.`)
-	await Logger(`(private chat) ~ clicked unswipe for <blank> #${queryPayload.idb} by <user> №${context.senderId}`)
+	await Logger(`(research archive) ~ clicked unswipe for <blank> #${queryPayload.idb} for @${user_self.username}`)
     await Archive_Research(context)
 }

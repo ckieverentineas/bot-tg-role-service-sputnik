@@ -174,6 +174,6 @@ export async function Verify_Blank_Not_Self(context: MessageContext, id_blank: n
 }
 
 export async function Blank_Vision_Activity(context: MessageContext, id_blank: number, user_self: Account) {
-    const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: context.chat.id, id_blank: id_blank }})
+    const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: user_self.id, id_blank: id_blank }})
 	if (!blank_vision_check) { await prisma.vision.create({ data: { id_account: user_self.id, id_blank: id_blank } }) }
 }
