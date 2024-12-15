@@ -25,7 +25,7 @@ export async function Blank_Self(context: MessageContext) {
     let answer = ''
 	if (!blank_check) {
         await Logger(`(blank config) ~ starting creation self <blank> for @${user_check.username}`)
-		answer = `⚠ У вас еще нет анкеты, нажмите ➕ Создать`
+		answer = `⚠ У вас еще нет анкеты, нажмите [➕ Создать]`
 	} else {
 		const blank = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
 		if (blank) {
