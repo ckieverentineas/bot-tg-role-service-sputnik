@@ -27,7 +27,9 @@ export async function Input_Module(context: any) {
         'blank_edit_prefab_input_off': Blank_Edit_Prefab_Input_Off, // 1 Анкета - Изменение анкеты
         "blank_report_prefab_input_off": Blank_Report_Prefab_Input_Off, // 2 Рандом - жалоба на анкету
         'blank_like_donation_prefab_input_off': Blank_Like_Donation_Prefab_Input_Off, // Рандом - лайк донатера с сообщением пользователю
-        'sniper_research_prefab_input_off': Sniper_Research_Prefab_Input_Off // Снайпер - Ввод номера анкеты
+        'sniper_research_prefab_input_off': Sniper_Research_Prefab_Input_Off, // Снайпер - Ввод номера анкеты
+        'tagator_report_prefab_input_off': Tagator_Report_Prefab_Input_Off,
+        'tagator_like_donation_prefab_input_off': Tagator_Like_Donation_Prefab_Input_Off
     };
     const command: string | any = users_pk[id].operation;
     if (typeof command != 'string') { return }
@@ -155,6 +157,49 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
     await Logger(`(random researcher) ~ report on <blank> #${blank_report_check.id} by @${user_check.username}`)
 }
 
+async function Tagator_Report_Prefab_Input_Off(context: any, id: number) {
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_check = user_verify.user_check
+    //const blank_check = user_verify.blank_check
+    // чистка пользовательского ввода от запрещенных символов
+    let text_input = await Blank_Cleaner(users_pk[id].text)
+    const keyboard_repeat = new InlineKeyboardBuilder()
+    .textButton({ text: '✏ Ввести жалобу', payload: { cmd: 'tagator_report_ION', idb: Number(users_pk[id].id_target) } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'tagator_research' } })
+    // верификация репорта
+    if (!users_pk[id].id_target) { return await Send_Message(context, `⚠ Анкета не выбрана для подачи жалобы`, keyboard_back); }
+    if (text_input.length < 10) { return await Send_Message(context, `⚠ Жалобу от 10 символов надо!`, keyboard_repeat); }
+    if (text_input.length > 2000) { return await Send_Message(context, `⚠ Жалобу до 2000 символов надо!`, keyboard_repeat);  }
+    // проверяем наличие пользователя и его анкеты для жалобы
+    const blank_verify = await Verify_Blank_Not_Self(context, Number(users_pk[id].id_target))
+    if (!blank_verify) { return }
+    const user_warn = blank_verify.user_nice
+    const blank_report_check = blank_verify.blank_nice
+    // сохранение репорта и уведомления
+    const report_set = await prisma.report.create({ data: { id_blank:  blank_report_check.id, id_account: user_check.id, text: text_input }})
+    const counter_warn = await prisma.report.count({ where: { id_blank: blank_report_check.id, status: 'wait' } })
+    await Send_Message_NotSelf(Number(user_warn.idvk), `✅ На вашу анкету #${blank_report_check.id} кто-то донес до модератора следующее: [${report_set.text}]!\n⚠ Жалоб: ${counter_warn}/3.\n💡 Не беспокойтесь, если это ложное обвинение, то после третьей жалобы модератор разблокирует вас.`)
+    if (counter_warn >= 3) {
+        await prisma.blank.update({ where: { id: blank_report_check.id }, data: { banned: true } })
+        await Send_Message_NotSelf(Number(user_warn.idvk), `🚫 На вашу анкету #${blank_report_check.id} донесли крысы ${counter_warn}/3. Изымаем анкету из поиска до разбирательства модераторами.`)
+        await Send_Message_NotSelf(Number(chat_id_moderate), `⚠ Анкета #${blank_report_check.id} изъята из поиска из-за жалоб, модераторы, примите меры!`)
+    }
+    // помечаем анкету просмотренной
+    await Blank_Vision_Activity(context, blank_report_check.id, user_check)
+    const keyboard = new InlineKeyboardBuilder()
+    .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_research' } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    await Send_Message(context, `✅ Мы зарегистрировали вашу жалобу на анкету #${blank_report_check.id}, спасибо за донос!`, keyboard)
+    await Send_Message_NotSelf(Number(chat_id_moderate), `🧨 На анкету #${blank_report_check.id} кто-то донес до модератора следующее: [${report_set.text}]!\n⚠ Жалоб: ${counter_warn}/3.`)
+    // очистка промежуточных данных
+    users_pk[id].operation = ''
+    users_pk[id].text = ''
+    users_pk[id].id_target = null
+    await Logger(`(tagator researcher) ~ report on <blank> #${blank_report_check.id} by @${user_check.username}`)
+}
+
 async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     // верификация пользователя
     const user_verify = await Verify_User(context)
@@ -191,6 +236,44 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     users_pk[id].text = ''
     users_pk[id].id_target = null
     await Logger(`(random researcher) ~ swipe like with message for <blank> #${blank_nice.id} by @${user_self.username}`)
+}
+
+async function Tagator_Like_Donation_Prefab_Input_Off(context: any, id: number) {
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_self = user_verify.user_check
+    const blank_self = user_verify.blank_check
+    // чистка пользовательского ввода от запрещенных символов
+    let text_input = await Blank_Cleaner(users_pk[id].text)
+    const keyboard_repeat = new InlineKeyboardBuilder()
+    .textButton({ text: '✏ Направо повторно', payload: { cmd: 'tagator_like_don', idb: Number(users_pk[id].id_target) } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'tagator_research' } })
+    // верификация репорта
+    if (!users_pk[id].id_target) { return await Send_Message(context, `⚠ Анкета не выбрана для жирного лайка`, keyboard_back); }
+    if (text_input.length < 10) { return await Send_Message(context, `⚠ Сообщение от 10 символов надо!`, keyboard_repeat); }
+    if (text_input.length > 3000) { return await Send_Message(context, `⚠ Сообщение до 3000 символов надо!`, keyboard_repeat);  }
+    // проверяем наличие пользователя и его анкеты для жалобы
+    const blank_verify = await Verify_Blank_Not_Self(context, Number(users_pk[id].id_target))
+    if (!blank_verify) { return }
+    const user_nice = blank_verify.user_nice
+    const blank_nice = blank_verify.blank_nice
+    // помечаем анкету просмотренной
+    await Blank_Vision_Activity(context, blank_nice.id, user_self)
+    // сохранение сообщения в почту и уведомления
+    const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: blank_self.id ?? 0 }})
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то, загляните в почту.`) 
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `✉️ Получено приватное письмо от владельца анкеты #${blank_self.id}: ${text_input}\n⚠ Чтобы отреагировать, загляните в почту и найдите анкету #${blank_self.id}.`)
+	await Send_Message_NotSelf(Number(chat_id_moderate), `⚖️ #${blank_self.id} --> ${text_input} --> #${blank_nice.id}`)
+    const keyboard = new InlineKeyboardBuilder()
+    .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_research' } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла, отправляем информацию об этом его/её владельцу вместе с приложением: ${text_input}`, keyboard)
+    // очистка промежуточных данных
+    users_pk[id].operation = ''
+    users_pk[id].text = ''
+    users_pk[id].id_target = null
+    await Logger(`(tagator researcher) ~ swipe like with message for <blank> #${blank_nice.id} by @${user_self.username}`)
 }
 
 async function Sniper_Research_Prefab_Input_Off(context: any, id: number) {

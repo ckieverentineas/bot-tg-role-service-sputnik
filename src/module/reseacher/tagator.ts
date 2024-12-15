@@ -46,7 +46,7 @@ export async function Tagator_Research(context: MessageContext) {
     const tag_self_like = user_check.tag_like != null ? JSON.parse(user_check.tag_like ?? []) : []
     const keyboard_tag_config = new InlineKeyboardBuilder()
     .textButton({ text: '✅ Выбрать теги', payload: { cmd: 'tagator_research_config_like' } })
-    if (tag_self_like && tag_self_like.length < 1) { return await Send_Message(context, `⚠ Настройте теги, по которым будем искать!`), keyboard_tag_config }
+    if (tag_self_like && tag_self_like.length < 1) { return await Send_Message(context, `⚠ Настройте теги, по которым будем искать!`, keyboard_tag_config) }
     // достаем теги, по которым не будет производиться подбор
     const tag_self_unlike = user_check.tag_unlike != null ? JSON.parse(user_check.tag_unlike ?? []) : []
     for (const blank of await prisma.$queryRaw<Blank[]>`SELECT * FROM Blank WHERE banned = false ORDER BY random() ASC`) {
@@ -96,11 +96,11 @@ export async function Tagator_Research(context: MessageContext) {
     .textButton({ text: `✅ Направо`, payload: { cmd: 'tagator_like', idb: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     if (user_check.donate == true) {
-        keyboard.textButton({ text: '‼✏ Направо', payload: { cmd: 'tagator_like_don', idb: selector.id  } }).row()
+        keyboard.textButton({ text: '✏ Направо', payload: { cmd: 'tagator_like_don', idb: selector.id  } }).row()
     } else {
         keyboard.row()
     }
-    keyboard.textButton({ text: '‼⚠ Жалоба', payload: { cmd: 'tagator_report', idb: selector.id } })
+    keyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'tagator_report', idb: selector.id } })
     await Send_Message(context, `${text}`, keyboard)
     await Logger(`(research tagator) ~ show <blank> #${selector.id} for @${user_check.username}`)
 }
@@ -172,7 +172,7 @@ export async function Tagator_Report_Perfab_Input_ON(context: MessageContext, qu
     const id = await User_Pk_Get(context)
     if (id == null) { return }
     users_pk[id].mode = 'input'
-    users_pk[id].operation = 'blank_report_prefab_input_off'
+    users_pk[id].operation = 'tagator_report_prefab_input_off'
 	users_pk[id].id_target = queryPayload.idb
     await Send_Message(context, `🧷 Введите причину жалобы от 10 до 2000 символов:`)
     await Logger(`(research tagator) ~ starting write report on <blank> #${queryPayload.idb} by @${user_self.username}`)
@@ -189,7 +189,7 @@ export async function Tagator_Like_Donation_Perfab_Input_ON(context: MessageCont
     const id = await User_Pk_Get(context)
     if (id == null) { return }
     users_pk[id].mode = 'input'
-    users_pk[id].operation = 'blank_like_donation_prefab_input_off'
+    users_pk[id].operation = 'tagator_like_donation_prefab_input_off'
 	users_pk[id].id_target = queryPayload.idb
     await Send_Message(context, `🧷 Введите приватное сообщение пользователю от 10 до 3000 символов:`)
     await Logger(`(research tagator) ~ starting write message for donation like on <blank> #${queryPayload.idb} by @${user_self.username}`)
@@ -269,6 +269,6 @@ export async function Tagator_Research_Config_Reset(context: MessageContext, que
     // добавляем или удаляем теги в список исключений
     await prisma.account.update({ where: { id: user_check.id }, data: { tag_unlike: JSON.stringify(tag) } })
     await prisma.account.update({ where: { id: user_check.id }, data: { tag_like: JSON.stringify(tag) } })
-    await Send_Message(context, `✅ Теги успешно сброшены для поиска черех "Тегатор"`, keyboard_back)
+    await Send_Message(context, `✅ Теги успешно сброшены для поиска через "Тегатор"`, keyboard_back)
     await Logger(`(research tagator config) ~ reset favorite and not favorite tags for @${user_check.username}`)
 }

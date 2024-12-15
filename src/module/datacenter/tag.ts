@@ -112,6 +112,6 @@ export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tag
     .textButton({ text: `${await getTagById_Self(43, tag) ? '✅' : ''}#актив`, payload: { cmd: `${command}`, id: 43 } })
     .textButton({ text: `${await getTagById_Self(44, tag) ? '✅' : ''}#пассив`, payload: { cmd: `${command}`, id: 44 } })
     .textButton({ text: `${await getTagById_Self(45, tag) ? '✅' : ''}#универсал`, payload: { cmd: `${command}`, id: 45 } }).row()
-    .textButton({ text: '🚫 Назад', payload: { cmd: `${command_back}` } }).row()
+    .textButton({ text: '👌 Дальше', payload: { cmd: `${command_back}` } }).row()
     return keyboard
 }
