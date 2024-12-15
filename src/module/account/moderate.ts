@@ -32,8 +32,8 @@ export async function Moderate_Self(context: MessageContext) {
     //выдача анкеты с фото
     const keyboard = InlineKeyboard.keyboard([
         [ 
-            InlineKeyboard.textButton({ text: '⛔ Отклонить', payload: { cmd: 'moderate_denied', idb: selector.id } }),
-            InlineKeyboard.textButton({ text: `✅ Заверить`, payload: { cmd: 'moderate_success', idb: selector.id } })
+            InlineKeyboard.textButton({ text: '⛔ Оправдать', payload: { cmd: 'moderate_denied', idb: selector.id } }),
+            InlineKeyboard.textButton({ text: `✅ Выдать пред`, payload: { cmd: 'moderate_success', idb: selector.id } })
         ],
         [
             InlineKeyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } }),

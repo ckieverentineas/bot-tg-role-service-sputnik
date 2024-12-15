@@ -99,7 +99,7 @@ export async function Blank_Report(context: MessageContext, queryPayload: any) {
     .textButton({ text: '✏ Ввести жалобу', payload: { cmd: 'blank_report_ION', idb: blank_report.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'random_research' } })
     // подтверждаем готовность ввода жалобы
-    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность нажав кнопку Ввести жалобу`, keyboard)
+    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность, нажав кнопку ✏ Ввести жалобу`, keyboard)
     await Logger(`(research random) ~ show prefab for report on <blank> #${blank_report.id} by @${user_self.username}`)
 }
 

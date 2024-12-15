@@ -69,12 +69,13 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
   hearManager.hear(/!помощь|\/help/, async (context: any) => {
     if (context.chat.id < 0) { return }
     await Online_Set(context)
-    await Send_Message(context, `☠ Команды бота уже сделанные:
-    \n👤 !бонькхаммер @username - где username уникальный адрес пользователя в тг, добавляет/убирает из черного списка в Спутнике;
-    \n👥 !права @username - где username уникальный адрес пользователя в тг, добавляет/убирает из списка администраторов в Спутнике;
-    \n👥 !донатер @username - где username уникальный адрес пользователя в тг, добавляет/убирает из списка донатеров в Спутнике;
-    \n👥 !бан @username - где username уникальный адрес пользователя в тг, добавляет/удаляет в бан Спутника для приостановки доступа.
-    \n⚠ Команды с символами:\n👤 - Доступны обычным пользователям;\n👥 - Доступны администраторам бота;`)
+    await Send_Message(context, `☠ Команды бота:
+    \n👤 !пкметр — функция быстрого подсчета компьютерных и мобильных строк, символов, предложений, лимитов в ролевом посте;
+    \n👤 !чс @username — где username — уникальный адрес пользователя в тг, добавляет/убирает из черного списка в Спутнике;
+    \n👥 !права @username — где username — уникальный адрес пользователя в тг, добавляет/убирает из списка администраторов в Спутнике;
+    \n👥 !донатер @username — где username — уникальный адрес пользователя в тг, добавляет/убирает из списка донатеров в Спутнике;
+    \n👥 !бан @username — где username — уникальный адрес пользователя в тг, добавляет/удаляет в бан Спутника для приостановки доступа.
+    \n⚠ Команды с символами:\n👤 — Доступны обычным пользователям;\n👥 — Доступны администраторам бота;`)
     await Logger(`Super help ${context.chat.id} got root`)
   })
   // выдача админ прав админами пользователям
@@ -116,7 +117,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
 			await Logger(`(private chat) ~ banned status changed <${login.banned ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
       const blank_block = await prisma.blank.findFirst({ where: { id_account: login.id } })
-      if (!blank_block) { return await Send_Message(context, `⌛ У ламината не было анкеты!`)}
+      if (!blank_block) { return await Send_Message(context, `⌛ У ролевика не было анкеты!`)}
       const blank_del = await prisma.blank.delete({ where: { id: blank_block.id } })
       await Send_Message(context, `🔧 Анкета ${blank_del.id} владельца @${login.username} была удалена:\n ${blank_del.text}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Ваша анкета ${blank_del.id} была удалена:\n ${blank_del.text}`)
@@ -132,7 +133,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
     if (!account_check) { 
       await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
-      return Send_Message(context, `🔧 @${target} не существует`);
+      return Send_Message(context, `🔧 К сожалению, ролевик @${target} еще не успел зарегистрироваться в Спутнике, приведите недруга к нам и сделайте это!`);
     }
 		await Online_Set(context)
     //проверка на наличие врага в черном списке
@@ -140,13 +141,13 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     if (black_list_ch) { 
       const keyboard = new InlineKeyboardBuilder()
       .textButton({ text: '📃 Амнистия', payload: { cmd: 'unbanhammer', idb:  black_list_ch.id } })
-      return await Send_Message(context, `⚠ К сожалению, пользователь @${account_check.username} уже в вашем черном списке. Как бы ни хотелось, но дважды и более подряд в ЧС не добавишь!`, keyboard); 
+      return await Send_Message(context, `⚠ К сожалению, ролевик @${account_check.username} уже в вашем черном списке. Как бы ни хотелось, но дважды и более подряд в ЧС не добавишь!`, keyboard); 
     }
     //добавление в черный список
     const blacklist_save = await prisma.blackList.create({ data: { idvk: Number(account_check.idvk), id_account: account_self.id } })
     if (!blacklist_save) { return }
     await Logger(`In database, added new person BL: ${blacklist_save.id}-${blacklist_save.idvk} by admin ${context.senderId}`)
-    await context.send(`🔧 Вы добавили в черный список пользователя @${account_check.username}`)
+    await context.send(`🔧 Вы добавили в черный список ролевика @${account_check.username}`)
   })
 
   hearManager.hear(/!донатер/, async (context: MessageContext) => {

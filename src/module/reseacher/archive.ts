@@ -10,7 +10,7 @@ export async function Archive_Research(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
-    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     if (!blank_check) { return await Send_Message(context, `⚠ Создайте анкету`) }
     if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
@@ -78,7 +78,7 @@ export async function Archive_Like(context: MessageContext, queryPayload: any) {
 	await Send_Message(context, `✅ Анкета #${blank_nice.id} вам зашла в архивариусе, отправляем информацию об этом его/её владельцу.`)
 	const mail_set = await prisma.mail.create({ data: { blank_to: blank_nice.id ?? 0, blank_from: blank_self.id ?? 0 }})
 	if (!mail_set) { return }
-    await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Ваша анкета #${blank_nice.id} понравилась кому-то в архивариусе, загляните в почту.`) 
+    await Send_Message_NotSelf(Number(user_nice.idvk) , `🔔 Вашу анкету #${blank_nice.id} кто-то достал из архива и лайкнул, загляните в почту.`) 
 	await Logger(`(private chat) ~ clicked swipe for <blank> #${blank_nice.id} by <user> №${context.chat.id}`)
     await Archive_Research(context)
 }

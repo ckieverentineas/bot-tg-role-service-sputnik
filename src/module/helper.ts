@@ -131,13 +131,13 @@ export async function Verify_User(context: MessageContext) {
     }
     const banned_me = await User_Banned(context)
     if (banned_me) { 
-        await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`, keyboard_back) 
+        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`, keyboard_back) 
         return false
     }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     if (!blank_check) { 
         const keyboard_blank = new InlineKeyboardBuilder().textButton({ text: '📃 Моя анкета', payload: { cmd: 'blank_self' } })
-        await Send_Message(context, `⚠ Создайте анкету, вызовите [!спутник] и нажмите [📃 Моя анкета]`, keyboard_blank) 
+        await Send_Message(context, `⚠ Создайте анкету: вызовите [!спутник] и нажмите [📃 Моя анкета]`, keyboard_blank) 
         return false
     }
     if (blank_check.banned) { 

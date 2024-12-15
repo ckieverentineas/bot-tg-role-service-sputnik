@@ -156,7 +156,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
 const commands = [
     { command: '/sputnik', description: 'main menu' },
     { command: '/help', description: 'help menu' },
-    { command: '/pkmetr', description: 'chlen menu' },
+    { command: '/pkmetr', description: 'pkmetr menu' },
     { command: '/keyboard', description: 'get call buttons' },
 ];
 

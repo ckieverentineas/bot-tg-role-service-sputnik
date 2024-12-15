@@ -49,7 +49,7 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (blank_check) { return }
 	await Online_Set(context)
@@ -69,7 +69,7 @@ async function Blank_Edit_Prefab_Input_Off(context: any, id: number) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
     if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
@@ -99,7 +99,7 @@ async function Blank_Report_Prefab_Input_Off(context: any, id: number) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
 	await Online_Set(context)
@@ -144,7 +144,7 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_self) { return }
     const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
     if (!blank_self) { return }
 	await Online_Set(context)
@@ -188,12 +188,12 @@ async function Sniper_Research_Prefab_Input_Off(context: any, id: number) {
     const user_self = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_self) { return }
     const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_self = await prisma.blank.findFirst({ where: { id_account: user_self.id } })
     if (!blank_self) { return }
 	await Online_Set(context)
     let text_input = await Blank_Cleaner(users_pk[id].text)
-    if (text_input.length < 1) { return await Send_Message(context, `⚠ Сообщение от 1 символов надо!`); }
+    if (text_input.length < 1) { return await Send_Message(context, `⚠ Сообщение от 1 символа надо!`); }
     if (text_input.length > 3000) { return await Send_Message(context, `⚠ Сообщение до 3000 символов надо!`);  }
     
     if (typeof Number(text_input) != "number") { return Send_Message(context, `⚠ Необходимо ввести число!`);}

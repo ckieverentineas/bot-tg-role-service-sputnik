@@ -9,17 +9,17 @@ import { getTagById } from "../datacenter/tag";
 
 export async function Tagator_Menu(context: MessageContext) {
     const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '🚀 Погнали СУрКИ', payload: { cmd: 'tagator_research' } }).row()
-    .textButton({ text: '✅ Искать по тегам', payload: { cmd: 'tagator_research_config_like' } }).row()
+    .textButton({ text: '🚀 Поехали', payload: { cmd: 'tagator_research' } }).row()
+    .textButton({ text: '✅ Выбрать теги', payload: { cmd: 'tagator_research_config_like' } }).row()
     .textButton({ text: '⛔ Исключить теги', payload: { cmd: 'tagator_research_config_unlike' } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-    await Send_Message(context, `🔎 Добро пожаловать в поисковую систему "Тегатор-3000", перед началом не забудьте настроить, кого ищите, и исключить кого вам точно нафиг не надо.`, keyboard)
+    await Send_Message(context, `🔎 Добро пожаловать в поисковую систему «Тегатор-3000», перед началом не забудьте настроить, что ищете, и исключить, что вам точно не надо.`, keyboard)
 }
 export async function Tagator_Research(context: MessageContext) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
     const banned_me = await User_Banned(context)
-    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+    if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })
     if (!blank_check) { return await Send_Message(context, `⚠ Создайте анкету`) }
     if (blank_check.banned) { return await Send_Message(context, `💔 Ваша анкета заблокирована из-за жалоб до разбирательств`) }
@@ -134,7 +134,7 @@ export async function Blank_Report(context: MessageContext, queryPayload: any) {
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
@@ -154,7 +154,7 @@ export async function Blank_Report(context: MessageContext, queryPayload: any) {
     ])
     // подтверждаем готовность ввода жалобы
 	await Logger(`(private chat) ~ starting report writing on <blank> #${blank_report.id} by <user> №${context.chat.id}`)
-    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность нажав кнопку Ввести жалобу`, keyboard, /*blank.photo*/)
+    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность нажав кнопку ✏ Ввести жалобу`, keyboard, /*blank.photo*/)
     await Logger(`(private chat) ~ finished self blank is viewed by <user> №${context.chat.id}`)
 }
 
@@ -162,7 +162,7 @@ export async function Tagator_Report_Perfab_Input_ON(context: MessageContext, qu
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
@@ -184,7 +184,7 @@ export async function Tagator_Like_Donation_Perfab_Input_ON(context: MessageCont
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
@@ -205,7 +205,7 @@ export async function Tagator_Research_Config_Like(context: MessageContext, quer
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
@@ -227,7 +227,7 @@ export async function Tagator_Research_Config_Like(context: MessageContext, quer
         console.log(i)
         tags += `${await getTagById(i)} `
     }
-    await Send_Message(context, `Вы выбрали следующие теги нафиг: ${tags}`)
+    await Send_Message(context, `Вы выбрали следующие теги: ${tags}`)
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '#фандом', payload: { cmd: 'tagator_research_config_like', id: 1 } })
     .textButton({ text: '#ориджинал', payload: { cmd: 'tagator_research_config_like', id: 2 } }).row()
@@ -293,7 +293,7 @@ export async function Tagator_Research_Config_Unlike(context: MessageContext, qu
     const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
     if (!user_check) { return }
 	const banned_me = await User_Banned(context)
-	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован обратитесь к админам для разбана`) }
+	if (banned_me) { return await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`) }
 	await Online_Set(context)
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     if (!blank_check) { return }
@@ -315,7 +315,7 @@ export async function Tagator_Research_Config_Unlike(context: MessageContext, qu
         console.log(i)
         tags += `${await getTagById(i)} `
     }
-    await Send_Message(context, `Вы выбрали следующие теги нафиг: ${tags}`)
+    await Send_Message(context, `Вы выбрали следующие теги: ${tags}`)
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '#фандом', payload: { cmd: 'tagator_research_config_unlike', id: 1 } })
     .textButton({ text: '#ориджинал', payload: { cmd: 'tagator_research_config_unlike', id: 2 } }).row()
