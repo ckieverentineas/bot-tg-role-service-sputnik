@@ -72,9 +72,10 @@ telegram.updates.on('message', async (context: MessageContext) => {
         }
     }
 	await Online_Set(context)
+    /*
     await bot.addMessage(context.text || 'zero');
     const ans = await bot.generateResponse(10);
-    await Send_Message(context,`${ans}`)
+    await Send_Message(context,`${ans}`)*/
 	return;
 });
 
@@ -158,6 +159,7 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
 });
 
 const commands = [
+    { command: '/start', description: 'registration in system' },
     { command: '/sputnik', description: 'main menu' },
     { command: '/help', description: 'help menu' },
     { command: '/pkmetr', description: 'pkmetr menu' },

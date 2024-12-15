@@ -23,6 +23,7 @@ export async function Logger(text: String) {
 export async function Send_Message(message: MessageContext, text: string, keyboard?: any) {
     text = text ? text : 'invalid message'
     try {
+        await Sleep(500)
         if (!keyboard) { await telegram.api.sendMessage({ chat_id: message.chat.id, text: `${text}` }); }
         else { await telegram.api.sendMessage({ chat_id: message.chat.id, text: `${text}`, reply_markup: keyboard }); }
     } catch (e) {
@@ -33,6 +34,7 @@ export async function Send_Message(message: MessageContext, text: string, keyboa
 export async function Send_Message_NotSelf(id_target: number, text: string, keyboard?: any) {
     text = text ? text : 'invalid message'
     try {
+        await Sleep(500)
         if (!keyboard) { await telegram.api.sendMessage({ chat_id: id_target, text: `${text}` }); }
         else { await telegram.api.sendMessage({ chat_id: id_target, text: `${text}`, reply_markup: keyboard }); }
     } catch (e) {
