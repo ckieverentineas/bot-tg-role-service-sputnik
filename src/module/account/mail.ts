@@ -37,7 +37,7 @@ export async function Mail_Self(context: MessageContext) {
 	}
 	let censored = user_check.censored ? await Censored_Activation_Pro(blank_from_check.text) : blank_from_check.text
 	//выдача анкеты с фото
-	const text = `🔔 Ваша анкета #${blank_to_check.id} понравилась автору следующей анкеты:\n 📜 Анкета: ${blank_from_check.id}\n💬 Содержание:\n${censored}`
+	const text = `🛰️ Почтовый сервис «Сова-5000»\n\n🔔 Ваша анкета #${blank_to_check.id} понравилась автору следующей анкеты:\n 📜 Анкета: ${blank_from_check.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '⛔ Налево', payload: { cmd: 'mail_unlike', idm: selector.id } })
     .textButton({ text: `✅ Направо`, payload: { cmd: 'mail_like', idm: selector.id } }).row()

@@ -37,7 +37,7 @@ export async function Blank_Self(context: MessageContext) {
 			const count_unread = await prisma.mail.count({ where: { blank_to: blank.id, read: false }})
 			const counter_warn = await prisma.report.count({ where: { id_blank: blank.id } })
 			let censored = user_check.censored ? await Censored_Activation_Pro(blank.text) : blank.text
-			answer = `📜 Анкета: ${blank.id}\n💬 Содержание:\n${censored}\n👁 Просмотров: ${count_vision}/${-1+count_max_vision}\n⚠ Предупреждений: ${counter_warn}/3\n✅ Принятых: ${count_success}\n🚫 Игноров: ${count_ignore}\n⌛ Ожидает: ${count_unread}\n❗ Потеряшек: ${count_wrong}`
+			answer = `🛰️ Бланковый станок «Бюрократия-6000»\n\n📜 Анкета: ${blank.id}\n💬 Содержание:\n${censored}\n👁 Просмотров: ${count_vision}/${-1+count_max_vision}\n⚠ Предупреждений: ${counter_warn}/3\n✅ Принятых: ${count_success}\n🚫 Игноров: ${count_ignore}\n⌛ Ожидает: ${count_unread}\n❗ Потеряшек: ${count_wrong}`
             await Logger(`(blank config) ~ show self <blank> #${blank.id} for @${user_check.username}`)
 		}
 	}

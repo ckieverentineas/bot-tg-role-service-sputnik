@@ -22,7 +22,7 @@ export async function Moderate_Self(context: MessageContext) {
         await Send_Message(context, `🗿 Жалоба от @${user?.username}(КрысаХ):\n💬 Заявление: ${report.text}\n\n`)
     }
     const user_warned = await prisma.account.findFirst({ where: { id: selector.id_account } })
-	const text = `⚖ Вершится суд над следующей анкетой и ее автором:\n📜 Анкета: ${selector.id}\n👤 Автор: @${user_warned?.username}\n💬 Содержание:\n${selector.text}`
+	const text = `🛰️ Система правосудия «Возмездие-4000»\n\n⚖ Вершится суд над следующей анкетой и ее автором:\n📜 Анкета: ${selector.id}\n👤 Автор: @${user_warned?.username}\n💬 Содержание:\n${selector.text}`
     //выдача анкеты с фото
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '⛔ Оправдать', payload: { cmd: 'moderate_denied', idb: selector.id } })
