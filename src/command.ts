@@ -8,7 +8,7 @@ import { Account } from "@prisma/client";
 export function commandUserRoutes(hearManager: HearManager<MessageContext>): void { 
   hearManager.hear(/!Клава|!клава|\/keyboard/, async (context: any) => {
     if (context.chat.id < 0) { return }
-    const keyboard = new KeyboardBuilder().textButton('!спутник' )
+    const keyboard = new KeyboardBuilder().textButton('!спутник')
     .textButton(`!пкметр`).resize()
     //await telegram.api.sendMessage({ chat_id: context.chat.id, text: `Емаа Клава Кока подьехала`, reply_markup: keyboard })
     /*.then(async (response: any) => { 
@@ -34,7 +34,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     .textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } })
     .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_menu' } }).row()
     .textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } })
-    .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } }).row()
+    .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit_menu' } }).row()
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
       .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_research' } }).row()

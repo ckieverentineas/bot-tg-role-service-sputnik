@@ -11,7 +11,7 @@ import { CallbackQueryContext, InlineKeyboard, MessageContext } from 'puregram';
 import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Blank_Inactivity, Logger, Online_Set, Send_Message, Sleep, Worker_Checker } from './module/helper';
-import { Main_Menu } from './module/menu/main';
+import { Exit_Menu, Main_Menu } from './module/menu/main';
 import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change, Tagator_Blank_Config } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
@@ -86,7 +86,6 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
     if (!message || !message.from) {
         return; // Игнорируем, если сообщение или чат отсутствуют
     }
-    
     const config: Record<string, Function> = {
         "success_processing_of_personal_data": Success_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Принятие
         "denied_processing_of_personal_data": Denied_Processing_Of_Personal_Data, // 1 Регистрация аккаунта - Отклонение
@@ -137,7 +136,8 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'tagator_unlike': Tagator_Unlike, // 7 Тегатор - дизлайк анкеты
         'tagator_report_ION': Tagator_Report_Perfab_Input_ON,
         'tagator_report': Tagator_Report,
-        'tagator_like_don': Tagator_Like_Donation_Perfab_Input_ON
+        'tagator_like_don': Tagator_Like_Donation_Perfab_Input_ON,
+        'exit_menu': Exit_Menu
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;

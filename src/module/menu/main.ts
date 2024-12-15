@@ -14,7 +14,7 @@ export async function Main_Menu(context: MessageContext) {
     .textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } })
     .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_menu' } }).row()
     .textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } })
-    .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit' } }).row()
+    .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit_menu' } }).row()
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
       .textButton({ text: `🎯 Снайпер`, payload: { cmd: 'sniper_research' } }).row()
@@ -29,4 +29,7 @@ export async function Main_Menu(context: MessageContext) {
     keyboard.urlButton({ text: '🔍 Найти в ВК', url: 'https://vk.com/sputnikbot' })
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
     await Logger(`SSL(private chat) ~ enter in main menu system is viewed by <user> №${context.chat.id}`)
+}
+export async function Exit_Menu(context: MessageContext) {
+  await context.editMessageText('🧹 Здесь было сообщение от Спутника')
 }
