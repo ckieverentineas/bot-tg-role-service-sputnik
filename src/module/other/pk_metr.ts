@@ -1,35 +1,34 @@
-import { InlineKeyboard, Keyboard } from "puregram";
+import { InlineKeyboard, Keyboard, KeyboardBuilder } from "puregram";
 import { users_pk } from "../..";
 import { Send_Message } from "../helper";
 
 //const caller = '[club224622524|@bscorplabinc]'
   const caller = '[club226323522|@sputnikbot]'
 export async function Counter_PK_Module(context: any) {
+    // подготовка хранилища для пк метра
     await User_Pk_Init(context)
+    // идентификация хранилища пользователя
     const id = await User_Pk_Get(context)
-    
     if (id == null) { return }
-    if (context.text == `!пкметр` || context.text == `/pkmetr`) { users_pk[id].mode = 'pkmetr'; await Send_Message(context, `✅ Активирован режим замера ПК. Вводите рп посты, или любой другой текст длины, какая нужна вам! Чтобы обнулить счёт, нажмите !обнулить, для выхода из режима пкметра нажмите !кончить`); return true }
-	if (context.text == `!обнулить` || context.text == `${caller} !обнулить`) { users_pk[id].text = ``; Send_Message(context, `🗑️ Обнулен счетчик режима замера ПК`); return true }
+    if (context.text == `!пкметр` || context.text == `/pkmetr`) { 
+        users_pk[id].mode = 'pkmetr'; 
+        await Send_Message(context, `✅ Активирован режим замера ПК. Вводите рп посты, или любой другой текст длины, какая нужна вам! Чтобы обнулить счёт, нажмите !обнулить, для выхода из режима пкметра нажмите !кончить`); 
+        return true 
+    }
+	if (context.text == `!обнулить` || context.text == `${caller} !обнулить`) { 
+        users_pk[id].text = ``; 
+        await Send_Message(context, `🗑️ Обнулен счетчик режима замера ПК`); 
+        return true 
+    }
     if (context.text == `!кончить` || context.text == `${caller} !кончить`) { 
         users_pk[id].mode = 'main'; users_pk[id].text = ``; 
-        const keyboard = Keyboard.keyboard([
-            [ 
-              InlineKeyboard.textButton({ text: '!спутник', payload: 'archive_self' }),
-              InlineKeyboard.textButton({ text: `!пкметр`, payload: 'sniper_self' })
-            ]
-        ]).resize()
+        const keyboard = new KeyboardBuilder().textButton('!спутник').textButton(`!пкметр`).resize()
         await Send_Message(context, `⛔ Обнулен и выключен режим замера ПК`, keyboard); 
         return true 
     }
 	if (context.text && typeof context.text == `string` && users_pk[id].mode == 'pkmetr') {
 		users_pk[id].text += context.text
-        const keyboard = Keyboard.keyboard([
-            [ 
-              InlineKeyboard.textButton({ text: '!обнулить', payload: 'archive_self' }),
-              InlineKeyboard.textButton({ text: `!кончить`, payload: 'sniper_self' })
-            ]
-        ]).resize()
+        const keyboard = new KeyboardBuilder().textButton('!обнулить').textButton(`!кончить`).resize()
 		//const lines = users.text.split(/...|..|.|!|\\?|!\\?|\\?!|;/).length; // количество предложений вообще не считается как надо, как надо?
 		const sentences = users_pk[id].text.match(/[^.!?]+[.!?]+/g);
 		const lines = sentences ? sentences.length : 0;
@@ -42,7 +41,6 @@ export async function Counter_PK_Module(context: any) {
     }
     return true
 	//console.log(users_pk[id].text)
-	
 }
 
 async function countWords(str: string) {

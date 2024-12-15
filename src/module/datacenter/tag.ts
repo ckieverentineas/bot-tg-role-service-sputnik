@@ -57,7 +57,7 @@ export async function getTagById_Self(id: number | string, tag_list_self: Array<
     const button = tag_list_self.find(button => button === Number(id));
     return button ? button : undefined;
 }
-export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tagator_research_config_like' | 'tagator_research_config_unlike', command_back: 'tagator_menu' ) {
+export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tagator_research_config_like' | 'tagator_research_config_unlike' | 'tagator_blank_config', command_back: 'tagator_menu' | 'main_menu' ) {
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: `${await getTagById_Self(1, tag) ? '✅' : ''}#фандом`, payload: { cmd: `${command}`, id: 1 } })
     .textButton({ text: `${await getTagById_Self(2, tag) ? '✅' : ''}#ориджинал`, payload: { cmd: `${command}`, id: 2 } }).row()

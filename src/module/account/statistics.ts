@@ -12,7 +12,7 @@ export async function List_Admin(context: any) {
     for (const i in usersr) { puller += `\n😎 ${usersr[i].id} - @${usersr[i].username}` }
     const keyboard = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, `${puller}`, keyboard)
-    await Logger(`In a private chat, the list administrators is viewed by admin ${user_check.idvk}`)
+    await Logger(`(statistics) ~ show <info> about list admins for @${user_check.username}`)
 }
 
 export async function List_Donate(context: any) {
@@ -25,7 +25,7 @@ export async function List_Donate(context: any) {
     for (const i in usersr) { puller += `\n💰 ${usersr[i].id} - @${usersr[i].username}` }
     const keyboard = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, `${puller}`, keyboard)
-    await Logger(`In a private chat, the list administrators is viewed by admin ${user_check.idvk}`)
+    await Logger(`(statistics) ~ show <info> about list donate users for @${user_check.username}`)
 }
 
 export async function List_Ban(context: any) {
@@ -38,7 +38,7 @@ export async function List_Ban(context: any) {
     for (const i in usersr) { puller += `\n☠ ${usersr[i].id} - @${usersr[i].username}` }
     const keyboard = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, `${puller}`, keyboard)
-    await Logger(`In a private chat, the list administrators is viewed by admin ${user_check.idvk}`)
+    await Logger(`(statistics) ~ show <info> about ban users for @${user_check.username}`)
 }
 
 export async function List_Banhammer(context: any) {
@@ -52,5 +52,5 @@ export async function List_Banhammer(context: any) {
         puller += `\n💀 ${user_enemy?.id} - @${user_enemy?.username}` }
     const keyboard = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, `${puller}`, keyboard)
-    await Logger(`In a private chat, the list administrators is viewed by admin ${user_check.idvk}`)
+    await Logger(`(statistics) ~ show <info> about list banhammer for @${user_check.username}`)
 }
