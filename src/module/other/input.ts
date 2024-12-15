@@ -1,6 +1,6 @@
 import { InlineKeyboard, InlineKeyboardBuilder } from "puregram";
 import { chat_id_moderate, users_pk } from "../..";
-import { Accessed, Blank_Cleaner, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Verify_Blank_Not_Self, Verify_User } from "../helper";
+import { Accessed, Blank_Cleaner, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Username_Verify, Verify_Blank_Not_Self, Verify_User } from "../helper";
 import prisma from "../prisma";
 import { Censored_Activation_Pro } from "./censored";
 import { User_Pk_Get, User_Pk_Init } from "./pk_metr";
@@ -47,9 +47,18 @@ export async function Input_Module(context: any) {
 
 async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     // верификация пользователя
-    const user_verify = await Verify_User(context)
-    if (!user_verify) { return }
-    const user_check = user_verify.user_check
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { 
+        await Send_Message(context, `💔 Ваш аккаунт не зарегистрирован, напишите начать.`)
+        return false 
+    }
+    const banned_me = await User_Banned(context)
+    if (banned_me) { 
+        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`, keyboard_back) 
+        return false
+    }
+    await Online_Set(context)
+    await Username_Verify(context)
     //const blank_check = user_verify.blank_check
     // чистка пользовательского ввода от запрещенных символов
     let text_input = await Blank_Cleaner(users_pk[id].text)

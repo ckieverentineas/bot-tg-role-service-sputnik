@@ -81,7 +81,7 @@ export async function Tagator_Blank_Config(context: MessageContext, queryPayload
     }
     let tags = ''
     for (const i of tag) {
-        console.log(i)
+        //console.log(i)
         tags += `${await getTagById(i)} `
     }
     //await Send_Message(context, `Вы выбрали следующие теги: ${tags}`)

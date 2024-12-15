@@ -11,15 +11,28 @@ export async function Tagator_Menu(context: MessageContext) {
     // верификация пользователя
     const user_verify = await Verify_User(context)
     if (!user_verify) { return }
-    //const user_self = user_verify.user_check
+    const user_self = user_verify.user_check
+    let tag_like = user_self.tag_like != null ? JSON.parse(user_self.tag_like ?? []) : []
+    let tags = '✅ Теги, по которым будет производиться поиск анкет: '
+        for (const i of tag_like) {
+            //console.log(i)
+            tags += `${await getTagById(i)} `
+        }
+    let tag_unlike = user_self.tag_unlike != null ? JSON.parse(user_self.tag_unlike ?? []) : []
+    tags += '\n\n⛔ Теги, по которым не будет производиться поиск анкет: '
+    for (const i of tag_unlike) {
+        //console.log(i)
+        tags += `${await getTagById(i)} `
+    }
     //const blank_self = user_verify.blank_check
     // формируем меню для конфигурирования тегатора
     const keyboard = new InlineKeyboardBuilder()
     .textButton({ text: '🚀 Поехали', payload: { cmd: 'tagator_research' } }).row()
     .textButton({ text: '✅ Выбрать теги', payload: { cmd: 'tagator_research_config_like' } }).row()
     .textButton({ text: '⛔ Исключить теги', payload: { cmd: 'tagator_research_config_unlike' } }).row()
+    .textButton({ text: '🧹 Сбросить теги', payload: { cmd: 'tagator_research_config_reset' } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-    await Send_Message(context, `🔎 Добро пожаловать в поисковую систему «Тегатор-3000», перед началом не забудьте настроить, что ищете, и исключить, что вам точно не надо.`, keyboard)
+    await Send_Message(context, `🔎 Добро пожаловать в поисковую систему «Тегатор-3000», перед началом не забудьте настроить, что ищете, и исключить, что вам точно не надо.\n\n${tags}`, keyboard)
 }
 export async function Tagator_Research(context: MessageContext) {
     // верификация пользователя
@@ -205,7 +218,7 @@ export async function Tagator_Research_Config_Like(context: MessageContext, quer
     }
     let tags = ''
     for (const i of tag) {
-        console.log(i)
+        //console.log(i)
         tags += `${await getTagById(i)} `
     }
     //await Send_Message(context, `Вы выбрали следующие теги: ${tags}`)
@@ -237,11 +250,25 @@ export async function Tagator_Research_Config_Unlike(context: MessageContext, qu
     }
     let tags = ''
     for (const i of tag) {
-        console.log(i)
+        //console.log(i)
         tags += `${await getTagById(i)} `
     }
     //await Send_Message(context, `Вы выбрали следующие теги: ${tags}`)
     const keyboard = await Keyboard_Tag_Constructor(tag, 'tagator_research_config_unlike', 'tagator_menu')
     await Send_Message(context, `📎 Настройте теги, по которым не будет искать тегатор-2086`, keyboard)
     await Logger(`(research tagator config) ~ select not favorite tag ${tag_sel} by @${user_check.username}`)
+}
+
+export async function Tagator_Research_Config_Reset(context: MessageContext, queryPayload: any) {
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_check = user_verify.user_check
+    //const blank_check = user_verify.blank_check
+    let tag: Array<number> = []
+    // добавляем или удаляем теги в список исключений
+    await prisma.account.update({ where: { id: user_check.id }, data: { tag_unlike: JSON.stringify(tag) } })
+    await prisma.account.update({ where: { id: user_check.id }, data: { tag_like: JSON.stringify(tag) } })
+    await Send_Message(context, `✅ Теги успешно сброшены для поиска черех "Тегатор"`, keyboard_back)
+    await Logger(`(research tagator config) ~ reset favorite and not favorite tags for @${user_check.username}`)
 }

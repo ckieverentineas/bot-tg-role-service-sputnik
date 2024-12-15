@@ -18,7 +18,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     .then(async () => { await Logger(`(private chat) ~ succes get keyboard is viewed by <user> №${context.senderId}`) })
     .catch((error) => { console.error(`User ${context.senderId} fail get keyboard: ${error}`) });*/
     await Send_Message(context, `🛰 Выдали для вас клавиатуру, ${context.chat.firstName}`, keyboard)
-    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+    await Logger(`(command center) ~ show keyboard for @${context.chat.id}`)
   })
   // главное меню
   hearManager.hear(/!спутник|!Спутник|\/sputnik/, async (context: any) => {
@@ -48,7 +48,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     keyboard.textButton({ text: '📊 Список ЧС', payload: { cmd: 'list_banhammer' } })
     keyboard.urlButton({ text: '🔍 Найти в ВК', url: 'https://vk.com/sputnikbot' })
     await Send_Message(context, `🛰 Вы в системе поиска соролевиков, ${context.chat.firstName}, что изволите?`, keyboard)
-    await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
+    await Logger(`(command center) ~ show main menu for @${context.chat.id}`)
   })
   // только для рут пользователя, выдача админки
   hearManager.hear(/!админка/, async (context: any) => {
@@ -59,7 +59,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       if (lvlup) {
           await Send_Message(context, `⚙ Рут права получены`)
           await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 Super user @${lvlup.username} got root`)
-          await Logger(`Super user ${context.chat.id} got root`)
+          await Logger(`(command center) ~ root user access for @${context.chat.id}`)
       } else {
           await Send_Message(context, `⚙ Ошибка`)
       }
@@ -76,7 +76,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     \n👥 !донатер @username — где username — уникальный адрес пользователя в тг, добавляет/убирает из списка донатеров в Спутнике;
     \n👥 !бан @username — где username — уникальный адрес пользователя в тг, добавляет/удаляет в бан Спутника для приостановки доступа.
     \n⚠ Команды с символами:\n👤 — Доступны обычным пользователям;\n👥 — Доступны администраторам бота;`)
-    await Logger(`Super help ${context.chat.id} got root`)
+    await Logger(`(command center) ~ show help panel for @${context.chat.id}`)
   })
   // выдача админ прав админами пользователям
   hearManager.hear(/!права/, async (context: MessageContext) => {
@@ -87,7 +87,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       target = target.replace('@', '')
       const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
       if (!account_check) { 
-        await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+        await Logger(`(command center) ~ not found <user> #${target} by <admin> №${context.chat.id}`)
         return Send_Message(context, `🔧 @${target} не существует`);
       }
 			await Online_Set(context)
@@ -95,7 +95,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Send_Message(context, `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.id_role == 2 ? 'добавлены в лист администраторов' : 'убраны из листа администраторов'}`)
       await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.id_role == 2 ? 'добавлен в лист администраторов' : 'убран из листа администраторов'}`)
-			await Logger(`(private chat) ~ changed role <${login.id_role == 2 ? 'admin' : 'user'}> for #${login.idvk} by <admin> №${context.chat.id}`)
+      await Logger(`(command center) ~ changed role <${login.id_role == 2 ? 'admin' : 'user'}> for #${login.idvk} by <admin> №${context.chat.id}`)
     }
   })
 
@@ -107,7 +107,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       target = target.replace('@', '')
       const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
       if (!account_check) { 
-        await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+        await Logger(`(command center) ~ not found <user> #${target} by <admin> №${context.chat.id}`)
         return Send_Message(context, `🔧 @${target} не существует`);
       }
 			await Online_Set(context)
@@ -115,7 +115,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Send_Message(context, `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.banned ? 'добавлены в лист забаненных' : 'убраны из листа забаненных'}`)
       await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.banned ? 'добавлен в лист забаненных' : 'убран из листа забаненных'}`)
-			await Logger(`(private chat) ~ banned status changed <${login.banned ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
+      await Logger(`(command center) ~ banned status changed <${login.banned ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
       const blank_block = await prisma.blank.findFirst({ where: { id_account: login.id } })
       if (!blank_block) { return await Send_Message(context, `⌛ У ролевика не было анкеты!`)}
       const blank_del = await prisma.blank.delete({ where: { id: blank_block.id } })
@@ -132,7 +132,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     target = target.replace('@', '')
     const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
     if (!account_check) { 
-      await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+      await Logger(`(command center) ~ not found <user> #${target} by №${context.chat.id}`)
       return Send_Message(context, `🔧 К сожалению, ролевик @${target} еще не успел зарегистрироваться в Спутнике, приведите недруга к нам и сделайте это!`);
     }
 		await Online_Set(context)
@@ -146,7 +146,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     //добавление в черный список
     const blacklist_save = await prisma.blackList.create({ data: { idvk: Number(account_check.idvk), id_account: account_self.id } })
     if (!blacklist_save) { return }
-    await Logger(`In database, added new person BL: ${blacklist_save.id}-${blacklist_save.idvk} by admin ${context.senderId}`)
+    await Logger(`(command center) ~ added new person BL: ${blacklist_save.id}-${blacklist_save.idvk} by №${context.chat.id}`)
     await context.send(`🔧 Вы добавили в черный список ролевика @${account_check.username}`)
   })
 
@@ -158,7 +158,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       target = target.replace('@', '')
       const account_check: Account | null = await prisma.account.findFirst({ where: { username: target } })
       if (!account_check) { 
-        await Logger(`(private chat) ~ not found <user> #${target} by <admin> №${context.senderId}`)
+        await Logger(`(command center) ~ not found <user> #${target} by <admin> №${context.chat.id}`)
         return Send_Message(context, `🔧 @${target} не существует`);
       }
 			await Online_Set(context)
@@ -166,7 +166,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
       await Send_Message(context, `🔧 @${login.username} ${login.donate ? 'добавлен в лист донатеров' : 'убран из листа донатеров'}`)
 			await Send_Message_NotSelf( Number(login.idvk), `🔧 Вы ${login.donate ? 'добавлены в лист донатеров' : 'убраны из листа донатеров'}`)
       await Send_Message_NotSelf(Number(chat_id_moderate), `🔧 @${login.username} ${login.donate ? 'добавлен в лист донатеров' : 'убран из листа донатеров'}`)
-			await Logger(`(private chat) ~ donate status changed <${login.donate ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
+      await Logger(`(command center) ~ donate status changed <${login.donate ? 'true' : 'false'}> for #${login.idvk} by <admin> №${context.chat.id}`)
     }
   })
   /*
@@ -192,6 +192,6 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
 		await Online_Set(context)
     await telegram.api.sendDocument( {chat_id: context.chat.id, document: {value: './prisma/sputnik-tg.db', type: MediaSourceType.Path }, caption: '💡 Открывать на сайте: https://sqliteonline.com/' } );
     await Send_Message_NotSelf(Number(chat_id_system), `‼ @${user_check.username}(Admin) делает бекап баз данных dev.db.`)
-    await Logger(`In private chat, did backup database by admin ${context.senderId}`)
+    await Logger(`(command center) ~ did backup database by <admin> №${context.chat.id}`)
     })
 }
