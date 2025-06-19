@@ -133,7 +133,7 @@ export async function Verify_User(context: MessageContext) {
     }
     const banned_me = await User_Banned(context)
     if (banned_me) { 
-        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`, keyboard_back) 
+        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @vasochka_s_konfetami для разбана`, keyboard_back) 
         return false
     }
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check?.id } })

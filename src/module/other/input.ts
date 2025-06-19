@@ -56,7 +56,7 @@ async function Blank_Create_Prefab_Input_Off(context: any, id: number) {
     }
     const banned_me = await User_Banned(context)
     if (banned_me) { 
-        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @beskoletov для разбана`, keyboard_back) 
+        await Send_Message(context, `💔 Ваш аккаунт заблокирован, обратитесь к @vasochka_s_konfetami для разбана`, keyboard_back) 
         return false
     }
     await Online_Set(context)
@@ -209,7 +209,7 @@ async function Blank_Like_Donation_Prefab_Input_Off(context: any, id: number) {
     // чистка пользовательского ввода от запрещенных символов
     let text_input = await Blank_Cleaner(users_pk[id].text)
     const keyboard_repeat = new InlineKeyboardBuilder()
-    .textButton({ text: '✏ Направо повторно', payload: { cmd: 'blank_like_don', idb: Number(users_pk[id].id_target) } }).row()
+    .textButton({ text: '✏ Письмо повторно', payload: { cmd: 'blank_like_don', idb: Number(users_pk[id].id_target) } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'random_research' } })
     // верификация репорта
     if (!users_pk[id].id_target) { return await Send_Message(context, `⚠ Анкета не выбрана для жирного лайка`, keyboard_back); }
@@ -247,7 +247,7 @@ async function Tagator_Like_Donation_Prefab_Input_Off(context: any, id: number) 
     // чистка пользовательского ввода от запрещенных символов
     let text_input = await Blank_Cleaner(users_pk[id].text)
     const keyboard_repeat = new InlineKeyboardBuilder()
-    .textButton({ text: '✏ Направо повторно', payload: { cmd: 'tagator_like_don', idb: Number(users_pk[id].id_target) } }).row()
+    .textButton({ text: '✏ Письмо повторно', payload: { cmd: 'tagator_like_don', idb: Number(users_pk[id].id_target) } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'tagator_research' } })
     // верификация репорта
     if (!users_pk[id].id_target) { return await Send_Message(context, `⚠ Анкета не выбрана для жирного лайка`, keyboard_back); }
@@ -302,13 +302,13 @@ async function Sniper_Research_Prefab_Input_Off(context: any, id: number) {
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `, keyboard_back) }
     let censored = user_self.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `🛰️ Поисковой режим «Снайпер-0000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const text = `🛰️ Поисковый режим «Снайпер-0000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } })
-    .textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
+    .textButton({ text: '⛔ Мимо', payload: { cmd: 'blank_unlike', idb: selector.id } })
+    .textButton({ text: `✅ Отклик`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     if (user_self.donate == true) {
-        keyboard.textButton({ text: '✏ Направо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
+        keyboard.textButton({ text: '✏ Письмо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
     } else {
         keyboard.row()
     }

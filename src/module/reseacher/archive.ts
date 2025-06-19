@@ -35,12 +35,12 @@ export async function Archive_Research(context: MessageContext) {
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `) }
     let censored = user_check.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `🛰️ Поисковой режим «Архив-1000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const text = `🛰️ Поисковый режим «Архив-1000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Налево', payload: { cmd: 'archive_unlike', idb: selector.id } })
-    .textButton({ text: `✅ Направо`, payload: { cmd: 'archive_like', idb: selector.id } }).row()
+    .textButton({ text: '⛔ Мимо', payload: { cmd: 'archive_unlike', idb: selector.id } })
+    .textButton({ text: `✅ Отклик`, payload: { cmd: 'archive_like', idb: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
-    //if (await Accessed(context) != `user`) { keyboard.textButton({ text: '🛠✏ Направо', payload: { cmd: 'archive_like_donation' } }) }
+    //if (await Accessed(context) != `user`) { keyboard.textButton({ text: '🛠✏ Письмо', payload: { cmd: 'archive_like_donation' } }) }
     await Send_Message(context, `${text}`, keyboard)
     await Logger(`(research archive) ~ show <blank> #${selector.id} for @${user_check.username}`)
 }

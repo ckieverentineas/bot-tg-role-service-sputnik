@@ -79,10 +79,10 @@ export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tag
     .textButton({ text: `${await getTagById_Self(17, tag) ? '✅' : ''}#романтика`, payload: { cmd: `${command}`, id: 17 } })
     .textButton({ text: `${await getTagById_Self(18, tag) ? '✅' : ''}#долговременная_игра`, payload: { cmd: `${command}`, id: 18 } }).row()
 
-    .textButton({ text: `${await getTagById_Self(19, tag) ? '✅' : ''}#фурри`, payload: { cmd: `${command}`, id: 19 } })
-    .textButton({ text: `${await getTagById_Self(20, tag) ? '✅' : ''}#омегаверс`, payload: { cmd: `${command}`, id: 20 } }).row()
-    .textButton({ text: `${await getTagById_Self(21, tag) ? '✅' : ''}#постельные_сцены`, payload: { cmd: `${command}`, id: 21 } })
-    .textButton({ text: `${await getTagById_Self(22, tag) ? '✅' : ''}#перепихон`, payload: { cmd: `${command}`, id: 22 } }).row()
+    //.textButton({ text: `${await getTagById_Self(19, tag) ? '✅' : ''}#фурри`, payload: { cmd: `${command}`, id: 19 } })
+    //.textButton({ text: `${await getTagById_Self(20, tag) ? '✅' : ''}#омегаверс`, payload: { cmd: `${command}`, id: 20 } }).row()
+    //.textButton({ text: `${await getTagById_Self(21, tag) ? '✅' : ''}#постельные_сцены`, payload: { cmd: `${command}`, id: 21 } })
+    //.textButton({ text: `${await getTagById_Self(22, tag) ? '✅' : ''}#перепихон`, payload: { cmd: `${command}`, id: 22 } }).row()
 
     .textButton({ text: `${await getTagById_Self(23, tag) ? '✅' : ''}#14+`, payload: { cmd: `${command}`, id: 23 } })
     .textButton({ text: `${await getTagById_Self(24, tag) ? '✅' : ''}#16+`, payload: { cmd: `${command}`, id: 24 } })
