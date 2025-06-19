@@ -35,13 +35,13 @@ export async function Random_Research(context: MessageContext) {
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `, keyboard_back) }
     let censored = user_check.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `🛰️ Поисковой режим «Рандом-2000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const text = `🛰️ Поисковый режим «Рандом-2000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Налево', payload: { cmd: 'blank_unlike', idb: selector.id } })
-    .textButton({ text: `✅ Направо`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
+    .textButton({ text: '⛔ Мимо', payload: { cmd: 'blank_unlike', idb: selector.id } })
+    .textButton({ text: `✅ Отклик`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     if (user_check.donate == true) { 
-        keyboard.textButton({ text: '✏ Направо', payload: { cmd: 'blank_like_don', idb: selector.id  } }).row() 
+        keyboard.textButton({ text: '✏ Письмо', payload: { cmd: 'blank_like_don', idb: selector.id  } }).row() 
     } else { 
         keyboard.row() 
     }

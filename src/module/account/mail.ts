@@ -39,8 +39,8 @@ export async function Mail_Self(context: MessageContext) {
 	//выдача анкеты с фото
 	const text = `🛰️ Почтовый сервис «Сова-5000»\n\n🔔 Ваша анкета #${blank_to_check.id} понравилась автору следующей анкеты:\n 📜 Анкета: ${blank_from_check.id}\n💬 Содержание:\n${censored}`
     const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Налево', payload: { cmd: 'mail_unlike', idm: selector.id } })
-    .textButton({ text: `✅ Направо`, payload: { cmd: 'mail_like', idm: selector.id } }).row()
+    .textButton({ text: '⛔ Мимо', payload: { cmd: 'mail_unlike', idm: selector.id } })
+    .textButton({ text: `✅ Отклик`, payload: { cmd: 'mail_like', idm: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, text, keyboard)
     await Logger(`(mailbox) ~ show <blank> #${selector.id} for @${user_check.username}`)
