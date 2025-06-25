@@ -40,12 +40,16 @@ export const tag_list = [
     { id: 37, text: '#литературный_стиль' },
     { id: 38, text: '#полурол' },
     { id: 39, text: '#джен' },
-    { id: 40, text: '#гет' },
-    { id: 41, text: '#слэш' },
-    { id: 42, text: '#фемслэш' },
+    { id: 40, text: '#муж_и_жен_персонажи' },
+    { id: 41, text: '#муж_персонажи' },
+    { id: 42, text: '#жен_персонажи' },
     { id: 43, text: '#актив' },
     { id: 44, text: '#пассив' },
     { id: 45, text: '#универсал' },
+    { id: 46, text: '#(пост)апокалипсис' },
+    { id: 47, text: '#прошлое' },
+    { id: 48, text: '#настоящее' },
+    { id: 49, text: '#будущее' },
 ];
 
 export async function getTagById(id: number | string): Promise<string | undefined> {
@@ -70,7 +74,8 @@ export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tag
     .textButton({ text: `${await getTagById_Self(8, tag) ? '✅' : ''}#историческое`, payload: { cmd: `${command}`, id: 8 } })
     .textButton({ text: `${await getTagById_Self(9, tag) ? '✅' : ''}#детектив`, payload: { cmd: `${command}`, id: 9 } })
     .textButton({ text: `${await getTagById_Self(10, tag) ? '✅' : ''}#криминал`, payload: { cmd: `${command}`, id: 10 } }).row()
-    .textButton({ text: `${await getTagById_Self(11, tag) ? '✅' : ''}#экшен`, payload: { cmd: `${command}`, id: 11 } })
+    .textButton({ text: `${await getTagById_Self(46, tag) ? '✅' : ''}#(пост)апокалипсис`, payload: { cmd: `${command}`, id: 46 } })
+    .textButton({ text: `${await getTagById_Self(11, tag) ? '✅' : ''}#экшен`, payload: { cmd: `${command}`, id: 11 } }).row()
     .textButton({ text: `${await getTagById_Self(12, tag) ? '✅' : ''}#ужасы`, payload: { cmd: `${command}`, id: 12 } })
     .textButton({ text: `${await getTagById_Self(13, tag) ? '✅' : ''}#драма`, payload: { cmd: `${command}`, id: 13 } })
     .textButton({ text: `${await getTagById_Self(14, tag) ? '✅' : ''}#мистика`, payload: { cmd: `${command}`, id: 14 } }).row()
@@ -83,6 +88,10 @@ export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tag
     //.textButton({ text: `${await getTagById_Self(20, tag) ? '✅' : ''}#омегаверс`, payload: { cmd: `${command}`, id: 20 } }).row()
     //.textButton({ text: `${await getTagById_Self(21, tag) ? '✅' : ''}#постельные_сцены`, payload: { cmd: `${command}`, id: 21 } })
     //.textButton({ text: `${await getTagById_Self(22, tag) ? '✅' : ''}#перепихон`, payload: { cmd: `${command}`, id: 22 } }).row()
+
+    .textButton({ text: `${await getTagById_Self(47, tag) ? '✅' : ''}#прошлое`, payload: { cmd: `${command}`, id: 47 } })
+    .textButton({ text: `${await getTagById_Self(48, tag) ? '✅' : ''}#настоящее`, payload: { cmd: `${command}`, id: 48 } })
+    .textButton({ text: `${await getTagById_Self(49, tag) ? '✅' : ''}#будущее`, payload: { cmd: `${command}`, id: 49 } }).row()
 
     .textButton({ text: `${await getTagById_Self(23, tag) ? '✅' : ''}#14+`, payload: { cmd: `${command}`, id: 23 } })
     .textButton({ text: `${await getTagById_Self(24, tag) ? '✅' : ''}#16+`, payload: { cmd: `${command}`, id: 24 } })
@@ -105,12 +114,12 @@ export async function Keyboard_Tag_Constructor(tag: Array<number>, command: 'tag
     .textButton({ text: `${await getTagById_Self(38, tag) ? '✅' : ''}#полурол`, payload: { cmd: `${command}`, id: 38 } }).row()
 
     .textButton({ text: `${await getTagById_Self(39, tag) ? '✅' : ''}#джен`, payload: { cmd: `${command}`, id: 39 } })
-    .textButton({ text: `${await getTagById_Self(40, tag) ? '✅' : ''}#гет`, payload: { cmd: `${command}`, id: 40 } })
-    .textButton({ text: `${await getTagById_Self(41, tag) ? '✅' : ''}#слэш`, payload: { cmd: `${command}`, id: 41 } })
-    .textButton({ text: `${await getTagById_Self(42, tag) ? '✅' : ''}#фемслэш`, payload: { cmd: `${command}`, id: 42 } }).row()
+    .textButton({ text: `${await getTagById_Self(40, tag) ? '✅' : ''}#муж_и_жен_персонажи`, payload: { cmd: `${command}`, id: 40 } }).row()
+    .textButton({ text: `${await getTagById_Self(41, tag) ? '✅' : ''}#муж_персонажи`, payload: { cmd: `${command}`, id: 41 } })
+    .textButton({ text: `${await getTagById_Self(42, tag) ? '✅' : ''}#жен_персонажи`, payload: { cmd: `${command}`, id: 42 } }).row()
 
-    .textButton({ text: `${await getTagById_Self(43, tag) ? '✅' : ''}#актив`, payload: { cmd: `${command}`, id: 43 } })
-    .textButton({ text: `${await getTagById_Self(44, tag) ? '✅' : ''}#пассив`, payload: { cmd: `${command}`, id: 44 } })
+    .textButton({ text: `${await getTagById_Self(43, tag) ? '✅' : ''}#ведущий`, payload: { cmd: `${command}`, id: 43 } })
+    .textButton({ text: `${await getTagById_Self(44, tag) ? '✅' : ''}#ведомый`, payload: { cmd: `${command}`, id: 44 } })
     .textButton({ text: `${await getTagById_Self(45, tag) ? '✅' : ''}#универсал`, payload: { cmd: `${command}`, id: 45 } }).row()
     .textButton({ text: '👌 Дальше', payload: { cmd: `${command_back}` } }).row()
     return keyboard
