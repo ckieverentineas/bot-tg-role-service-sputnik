@@ -20,7 +20,7 @@ export async function Blank_Self(context: MessageContext) {
         const dateold: any = new Date(blank_check.crdate)
         const timeouter = 86400000
         keyboard.textButton({ text: '⛔ Удалить', payload: { cmd: 'blank_delete' } })
-        if (datenow-dateold > timeouter) { keyboard.textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }).row() } else { keyboard.row() }
+        if (datenow-dateold < timeouter) { keyboard.textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }).row() } else { keyboard.row() }
         keyboard.textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
     } else {
         keyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
