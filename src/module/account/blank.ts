@@ -15,9 +15,13 @@ export async function Blank_Self(context: MessageContext) {
 	const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     const keyboard = new InlineKeyboardBuilder()
     if (blank_check) { 
+        // проверка таймстемпа на редактирование анкеты
+        const datenow: any = new Date()
+        const dateold: any = new Date(blank_check.crdate)
+        const timeouter = 86400000
         keyboard.textButton({ text: '⛔ Удалить', payload: { cmd: 'blank_delete' } })
-        .textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }).row()
-        .textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
+        if (datenow-dateold > timeouter) { keyboard.textButton({ text: '✏ Изменить', payload: { cmd: 'blank_edit_prefab_input_on' } }).row() } else { keyboard.row() }
+        keyboard.textButton({ text: '🧲 Настроить теги', payload: { cmd: 'tagator_blank_config' } })
     } else {
         keyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
     }
