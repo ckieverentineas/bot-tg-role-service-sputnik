@@ -1,4 +1,3 @@
-
 import * as dotenv from 'dotenv';
 import { Keyboard, KeyboardBuilder, Telegram } from 'puregram';
 
@@ -12,17 +11,17 @@ import { HearManager } from '@puregram/hear';
 import { commandUserRoutes } from './command';
 import { Blank_Inactivity, Logger, Online_Set, Send_Message, Sleep, Worker_Checker } from './module/helper';
 import { Exit_Menu, Main_Menu } from './module/menu/main';
-import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change, Tagator_Blank_Config } from './module/account/blank';
+import { Blank_Create, Blank_Create_Prefab_Input_ON, Blank_Delete, Blank_Edit_Prefab_Input_ON, Blank_Self, Censored_Change, Tagator_Blank_Config, Tag_Display_Settings } from './module/account/blank';
 import { Counter_PK_Module } from './module/other/pk_metr';
 import { Input_Module } from './module/other/input';
-import { Blank_Like, Blank_Like_Donation_Perfab_Input_ON, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research } from './module/reseacher/random';
+import { Blank_Like, Blank_Like_Donation_Perfab_Input_ON, Blank_Report, Blank_Report_Perfab_Input_ON, Blank_Unlike, Random_Research, Show_Tags, Random_Research_Show_Blank } from './module/reseacher/random';
 import { Mail_Like, Mail_Self, Mail_Unlike } from './module/account/mail';
 import { Moderate_Denied, Moderate_Self, Moderate_Success } from './module/account/moderate';
 import { UnBanHammer } from './module/account/banhammer';
-import { Archive_Like, Archive_Research, Archive_Unlike } from './module/reseacher/archive';
+import { Archive_Like, Archive_Research, Archive_Unlike, Show_Tags_Archive, Archive_Research_Show_Blank } from './module/reseacher/archive';
 import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/account/statistics';
-import { Sniper_Research_Perfab_Input_ON } from './module/reseacher/sniper';
-import { Tagator_Like, Tagator_Like_Donation_Perfab_Input_ON, Tagator_Menu, Tagator_Report, Tagator_Report_Perfab_Input_ON, Tagator_Research, Tagator_Research_Config_Like, Tagator_Research_Config_Reset, Tagator_Research_Config_Unlike, Tagator_Unlike } from './module/reseacher/tagator';
+import { Sniper_Research_Perfab_Input_ON, Show_Tags_Sniper, Sniper_Research_Show_Blank } from './module/reseacher/sniper';
+import { Tagator_Like, Tagator_Like_Donation_Perfab_Input_ON, Tagator_Menu, Tagator_Report, Tagator_Report_Perfab_Input_ON, Tagator_Research, Tagator_Research_Config_Like, Tagator_Research_Config_Reset, Tagator_Research_Config_Unlike, Tagator_Unlike, Show_Tags_Tagator, Tagator_Research_Show_Blank } from './module/reseacher/tagator';
 import { Bot } from './module/ai/speak';
 
 
@@ -100,7 +99,16 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'blank_create_prefab_input_on': Blank_Create_Prefab_Input_ON, // 2 Анкета - активация режима ввода анкеты пользователем
         'blank_delete': Blank_Delete, // 2 Анкета - Удаление анкеты пользователем,
         'blank_edit_prefab_input_on': Blank_Edit_Prefab_Input_ON, // 2 Анкета - Изменение анкеты пользователем
+        'tag_display_settings': Tag_Display_Settings, // 2 Анкета - Настройки отображения тегов
 
+        'show_tags': Show_Tags,
+        'show_tags_sniper': Show_Tags_Sniper,
+        'random_research_show_blank': Random_Research_Show_Blank, // Показ конкретной анкеты в рандоме
+        'sniper_research_show_blank': Sniper_Research_Show_Blank,
+        'show_tags_tagator': Show_Tags_Tagator,
+        'tagator_research_show_blank': Tagator_Research_Show_Blank,
+        'show_tags_archive': Show_Tags_Archive,
+        'archive_research_show_blank': Archive_Research_Show_Blank,
         'random_research': Random_Research, // 3 Поиск - Случайный рандом входная точка
         'blank_like': Blank_Like, // 3 Поиск - Случайный рандом лайкаем анкетку конфетку,
         'blank_like_don': Blank_Like_Donation_Perfab_Input_ON, // 3 Поиск - Случайный донатерский рандом лайкаем анкету с приложением письма.

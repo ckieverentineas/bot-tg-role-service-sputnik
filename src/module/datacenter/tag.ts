@@ -1,4 +1,5 @@
 import { InlineKeyboardBuilder } from "puregram";
+import prisma from "../prisma";
 
 export const tag_list = [
     { id: 1, text: '#фандом' },
@@ -43,8 +44,8 @@ export const tag_list = [
     { id: 40, text: '#муж_и_жен_персонажи' },
     { id: 41, text: '#муж_персонажи' },
     { id: 42, text: '#жен_персонажи' },
-    { id: 43, text: '#актив' },
-    { id: 44, text: '#пассив' },
+    { id: 43, text: '#ведущий' },
+    { id: 44, text: '#ведомый' },
     { id: 45, text: '#универсал' },
     { id: 46, text: '#(пост)апокалипсис' },
     { id: 47, text: '#прошлое' },
@@ -52,11 +53,73 @@ export const tag_list = [
     { id: 49, text: '#будущее' },
 ];
 
+// Добавляем новую функцию для получения тегов анкеты
+export async function getTagsForBlank(blankId: number): Promise<{id: number, name: string}[]> {
+    try {
+        const blank = await prisma.blank.findUnique({
+            where: { id: blankId },
+            select: {
+                tag: true
+            }
+        });
+        
+        console.log('DEBUG: Blank tag data:', blank?.tag); // Отладка
+        
+        if (!blank || !blank.tag) {
+            return [];
+        }
+        
+        // Разные возможные форматы хранения тегов:
+        let tagIds: number[] = [];
+        
+        // Вариант 1: "#1 #5 #42 #25 #21 #22"
+        if (blank.tag.includes('#')) {
+            const matches = blank.tag.match(/#(\d+)/g);
+            if (matches) {
+                tagIds = matches.map(match => parseInt(match.replace('#', ''))).filter(id => !isNaN(id));
+            }
+        } 
+        // Вариант 2: "1,5,42,25,21,22" 
+        else if (blank.tag.includes(',')) {
+            tagIds = blank.tag.split(',')
+                .map(t => parseInt(t.trim()))
+                .filter(t => !isNaN(t));
+        }
+        // Вариант 3: просто числа через пробелы
+        else {
+            tagIds = blank.tag.split(' ')
+                .map(t => parseInt(t.trim()))
+                .filter(t => !isNaN(t));
+        }
+        
+        console.log('DEBUG: Extracted tag IDs:', tagIds); // Отладка
+        
+        // Преобразуем ID в текстовые названия
+        const tagNames = tagIds.map(id => {
+            const tag = tag_list.find(t => t.id === id);
+            return tag ? tag.text.replace('#', '') : null;
+        }).filter(t => t !== null) as string[];
+        
+        console.log('DEBUG: Final tag names:', tagNames); // Отладка
+        
+        return tagNames.map((name, index) => ({ 
+            id: index, 
+            name: name
+        }));
+        
+    } catch (error) {
+        console.error('Error fetching tags for blank:', error);
+        return [];
+    }
+}
+
 export async function getTagById(id: number | string): Promise<string | undefined> {
     const button = tag_list.find(button => button.id === Number(id));
     return button ? button.text : undefined;
 }
+
 export const keyboard_back = new InlineKeyboardBuilder().textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+
 export async function getTagById_Self(id: number | string, tag_list_self: Array<number>): Promise<number | undefined> {
     const button = tag_list_self.find(button => button === Number(id));
     return button ? button : undefined;
