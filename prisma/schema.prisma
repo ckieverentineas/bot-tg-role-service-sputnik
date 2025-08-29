@@ -14,6 +14,8 @@ model Account {
   username String?
   tag_like String?
   tag_unlike String?
+  tag_display_mode String?  @default("smart")    // "smart" или "hidden"
+  tag_position     String?  @default("bottom")   // "top" или "bottom"
   id_role  Int      @default(1)
   censored Boolean  @default(true)
   banned   Boolean  @default(false)
@@ -25,6 +27,7 @@ model Account {
   Report   Report[]
   BlackList BlackList[]
 }
+
 model BlackList {
   id       Int      @id @default(autoincrement())
   idvk     BigInt
