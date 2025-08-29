@@ -1,11 +1,11 @@
 import { InlineKeyboard, MessageContext, InlineKeyboardBuilder } from "puregram";
 import prisma from "../prisma";
-import { Accessed, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Verify_Blank_Not_Self, Verify_User } from "../helper";
+import { Accessed, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Verify_Blank_Not_Self, Verify_User, Format_Text_With_Tags } from "../helper";
 import { Censored_Activation_Pro } from "../other/censored";
 import { telegram, users_pk } from "../..";
 import { User_Pk_Get, User_Pk_Init } from "../other/pk_metr";
 import { Blank } from "@prisma/client";
-import { getTagById, getTagById_Self, keyboard_back, Keyboard_Tag_Constructor } from "../datacenter/tag";
+import { getTagById, getTagById_Self, keyboard_back, Keyboard_Tag_Constructor, getTagsForBlank } from "../datacenter/tag";
 
 export async function Tagator_Menu(context: MessageContext) {
     // верификация пользователя
@@ -34,6 +34,7 @@ export async function Tagator_Menu(context: MessageContext) {
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
     await Send_Message(context, `🔎 Добро пожаловать в поисковую систему «Тегатор-3000», перед началом не забудьте настроить, что ищете, и исключить, что вам точно не надо.\n\n${tags}`, keyboard)
 }
+
 export async function Tagator_Research(context: MessageContext) {
     // верификация пользователя
     const user_verify = await Verify_User(context)
@@ -84,25 +85,88 @@ export async function Tagator_Research(context: MessageContext) {
     }
     const keyboard_tag_return = new InlineKeyboardBuilder()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'tagator_menu' } })
-    if (!blank_build) { return await Send_Message(context, `😿 Очередь пустая, попробуйте использовать другие теги, или исключить исключаемые теги.`, keyboard_tag_return) }
+    if (!blank_build) { return await Send_Message(context, `😿 Очередь пустая, попробуйте использовать другие теги или исключить исключаемые теги.`, keyboard_tag_return) }
     // формируем меню для найденной анкеты
     const selector: Blank = blank_build
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `) }
     let censored = user_check.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `🛰️ Поисковый режим «Тегатор-3000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
-    const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Мимо', payload: { cmd: 'tagator_unlike', idb: selector.id } })
+    
+    // --- добавляем теги через новую систему ---
+    const tags = await getTagsForBlank(selector.id)
+    const baseText = `🛰️ Поисковый режим «Тегатор-3000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const { text, keyboard } = await Format_Text_With_Tags(context, baseText, selector.id, tags)
+    
+    keyboard.textButton({ text: '⛔ Мимо', payload: { cmd: 'tagator_unlike', idb: selector.id } })
     .textButton({ text: `✅ Отклик`, payload: { cmd: 'tagator_like', idb: selector.id } }).row()
     .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    
     if (user_check.donate == true) {
         keyboard.textButton({ text: '✏ Письмо', payload: { cmd: 'tagator_like_don', idb: selector.id  } }).row()
     } else {
         keyboard.row()
     }
+    
     keyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'tagator_report', idb: selector.id } })
+    
     await Send_Message(context, `${text}`, keyboard)
     await Logger(`(research tagator) ~ show <blank> #${selector.id} for @${user_check.username}`)
+}
+
+// --- новый обработчик для показа тегов в тегаторе ---
+export async function Show_Tags_Tagator(context: MessageContext, queryPayload: any) {
+    const tags = await getTagsForBlank(queryPayload.idb)
+    const tagsText = tags.length ? tags.map((t: {name: string}) => `#${t.name}`).join("\n") : "Тегов нет"
+    
+    const keyboard = new InlineKeyboardBuilder()
+        .textButton({ text: "⬅ Назад к анкете", payload: { cmd: "tagator_research_show_blank", idb: queryPayload.idb } })
+
+    await Send_Message(context, `🏷 Теги анкеты #${queryPayload.idb}:\n\n${tagsText}`, keyboard)
+    await Logger(`(research tagator) ~ show tags for <blank> #${queryPayload.idb}`)
+}
+
+// --- функция для показа конкретной анкеты в тегаторе ---
+export async function Tagator_Research_Show_Blank(context: MessageContext, queryPayload: any) {
+    // верификация пользователя
+    const user_verify = await Verify_User(context)
+    if (!user_verify) { return }
+    const user_check = user_verify.user_check
+    
+    // Получаем анкету по ID
+    const blank_check_notself = await prisma.blank.findFirst({ 
+        where: { 
+            id: queryPayload.idb,
+            banned: false 
+        } 
+    })
+    
+    if (!blank_check_notself) {
+        return await Send_Message(context,
+            `⚠ Внимание, анкета #${queryPayload.idb} была удалена владельцем или забанена`,
+            keyboard_back)
+    }
+
+    let censored = user_check.censored ? await Censored_Activation_Pro(blank_check_notself.text) : blank_check_notself.text
+    
+    // Используем новую систему форматирования с тегами
+    const baseText = `🛰️ Поисковый режим «Тегатор-3000»:\n\n📜 Анкета: ${blank_check_notself.id}\n💬 Содержание:\n${censored}`
+    const tags = await getTagsForBlank(blank_check_notself.id)
+    const { text, keyboard } = await Format_Text_With_Tags(context, baseText, blank_check_notself.id, tags)
+    
+    keyboard.textButton({ text: '⛔ Мимо', payload: { cmd: 'tagator_unlike', idb: blank_check_notself.id } })
+    .textButton({ text: `✅ Отклик`, payload: { cmd: 'tagator_like', idb: blank_check_notself.id } }).row()
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    
+    if (user_check.donate == true) {
+        keyboard.textButton({ text: '✏ Письмо', payload: { cmd: 'tagator_like_don', idb: blank_check_notself.id  } }).row()
+    } else {
+        keyboard.row()
+    }
+    
+    keyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'tagator_report', idb: blank_check_notself.id } })
+    
+    await Send_Message(context, `${text}`, keyboard)
+    await Logger(`(research tagator) ~ show specific <blank> #${blank_check_notself.id} for @${user_check.username}`)
 }
 
 export async function Tagator_Like(context: MessageContext, queryPayload: any) {
@@ -154,7 +218,7 @@ export async function Tagator_Report(context: MessageContext, queryPayload: any)
     .textButton({ text: '✏ Ввести жалобу', payload: { cmd: 'tagator_report_ION', idb: blank_report.id } })
     .textButton({ text: '🚫 Назад', payload: { cmd: 'tagator_research' } })
     // подтверждаем готовность ввода жалобы
-    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность нажав кнопку [✏ Ввести жалобу]`, keyboard)
+    await Send_Message(context, `📎 Перед вводом жалобы подтвердите готовность, нажав кнопку [✏ Ввести жалобу]`, keyboard)
     await Logger(`(research tagator) ~ show prefab for report on <blank> #${blank_report.id} by @${user_self.username}`)
 }
 

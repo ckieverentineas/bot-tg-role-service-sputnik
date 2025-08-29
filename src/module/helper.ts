@@ -179,3 +179,69 @@ export async function Blank_Vision_Activity(context: MessageContext, id_blank: n
     const blank_vision_check = await prisma.vision.findFirst({ where: { id_account: user_self.id, id_blank: id_blank }})
 	if (!blank_vision_check) { await prisma.vision.create({ data: { id_account: user_self.id, id_blank: id_blank } }) }
 }
+
+export async function Format_Text_With_Tags(
+    context: MessageContext, 
+    baseText: string, 
+    blankId: number, 
+    tags: any[]
+): Promise<{ text: string, keyboard: InlineKeyboardBuilder }> {
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } });
+    if (!user_check) return { text: baseText, keyboard: new InlineKeyboardBuilder() };
+
+    // Добавляем значения по умолчанию для новых полей
+    const tagDisplayMode = (user_check as any).tag_display_mode || 'smart';
+    const tagPosition = (user_check as any).tag_position || 'bottom';
+    
+    const tagsText = tags.map((t: {name: string}) => `#${t.name}`).join(" ");
+    const keyboard = new InlineKeyboardBuilder();
+    
+    // Разбиваем базовый текст на части для правильного порядка
+    const parts = baseText.split('\n\n');
+    let titlePart = parts[0]; // 🛰️ Поисковый режим...
+    let contentPart = parts.slice(1).join('\n\n'); // Остальное содержание
+    
+    let finalText = baseText;
+
+    if (tagDisplayMode === 'hidden') {
+        // Всегда скрывать - показываем только кнопку
+        if (tags.length > 0) {
+            keyboard.textButton({ 
+                text: "🏷 Показать теги", 
+                payload: { cmd: "show_tags", idb: blankId } 
+            }).row();
+        }
+        finalText = titlePart + '\n\n' + contentPart; // Убедимся, что теги не добавляются в текст
+    } else {
+        // Умное отображение
+        // Сначала заголовок, потом теги (если выбрана позиция сверху), потом содержание
+        let textWithTags = titlePart;
+        
+        if (tagPosition === 'top' && tagsText) {
+            textWithTags += '\n\n' + tagsText + '\n\n' + contentPart;
+        } else if (tagsText) {
+            textWithTags += '\n\n' + contentPart + '\n\n' + tagsText;
+        } else {
+            textWithTags += '\n\n' + contentPart;
+        }
+        
+        const totalLength = textWithTags.length;
+        
+        if (totalLength <= 4096) {
+            // Помещается в одно сообщение
+            finalText = textWithTags;
+        } else {
+            // Не помещается - показываем кнопку
+            if (tags.length > 0) {
+                keyboard.textButton({ 
+                    text: "🏷 Показать теги", 
+                    payload: { cmd: "show_tags", idb: blankId } 
+                }).row();
+            }
+            // Оставляем только заголовок и содержание без тегов
+            finalText = titlePart + '\n\n' + contentPart;
+        }
+    }
+
+    return { text: finalText, keyboard };
+}

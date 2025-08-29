@@ -1,11 +1,11 @@
 import { InlineKeyboard, InlineKeyboardBuilder } from "puregram";
 import { chat_id_moderate, users_pk } from "../..";
-import { Accessed, Blank_Cleaner, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Username_Verify, Verify_Blank_Not_Self, Verify_User } from "../helper";
+import { Accessed, Blank_Cleaner, Blank_Vision_Activity, Logger, Online_Set, Send_Message, Send_Message_NotSelf, User_Banned, Username_Verify, Verify_Blank_Not_Self, Verify_User, Format_Text_With_Tags } from "../helper";
 import prisma from "../prisma";
 import { Censored_Activation_Pro } from "./censored";
 import { User_Pk_Get, User_Pk_Init } from "./pk_metr";
 import { Blank } from "@prisma/client";
-import { keyboard_back } from "../datacenter/tag";
+import { keyboard_back, getTagsForBlank } from "../datacenter/tag";
 
 export async function Input_Module(context: any) {
     // подготовка хранилища для модуля ввода пользователем
@@ -302,17 +302,24 @@ async function Sniper_Research_Prefab_Input_Off(context: any, id: number) {
     const blank_check_notself = await prisma.blank.findFirst({ where: { id: selector.id } })
     if (!blank_check_notself) { return await Send_Message(context, `⚠ Внимание, следующая анкета была удалена владельцем в процессе просмотра и изъята из поиска:\n\n📜 Анкета: ${selector.id}\n💬 Содержание: ${selector.text}\n `, keyboard_back) }
     let censored = user_self.censored ? await Censored_Activation_Pro(selector.text) : selector.text
-    const text = `🛰️ Поисковый режим «Снайпер-0000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
-    const keyboard = new InlineKeyboardBuilder()
-    .textButton({ text: '⛔ Мимо', payload: { cmd: 'blank_unlike', idb: selector.id } })
+    
+    // Используем новую систему форматирования с тегами
+    const baseText = `🛰️ Поисковый режим «Снайпер-0000»:\n\n📜 Анкета: ${selector.id}\n💬 Содержание:\n${censored}`
+    const tags = await getTagsForBlank(selector.id)
+    const { text, keyboard } = await Format_Text_With_Tags(context, baseText, selector.id, tags)
+    
+    keyboard.textButton({ text: '⛔ Мимо', payload: { cmd: 'blank_unlike', idb: selector.id } })
     .textButton({ text: `✅ Отклик`, payload: { cmd: 'blank_like', idb: selector.id } }).row()
-    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    .textButton({ text: '🚫 Назад', payload: { cmd: 'sniper_research' } })
+    
     if (user_self.donate == true) {
         keyboard.textButton({ text: '✏ Письмо', payload: { cmd: 'blank_like_don', idb: selector.id  } })
     } else {
         keyboard.row()
     }
+    
     keyboard.textButton({ text: '⚠ Жалоба', payload: { cmd: 'blank_report', idb: selector.id } })
+    
     await Send_Message(context, `${text}`, keyboard)
     // очистка промежуточных данных
     users_pk[id].operation = ''
