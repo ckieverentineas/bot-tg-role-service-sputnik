@@ -1,6 +1,6 @@
 import { InlineKeyboard, InlineKeyboardBuilder, MessageContext } from "puregram";
 import prisma from "../prisma";
-import { Accessed, Logger, Online_Set, Send_Message, User_Banned, Verify_User } from "../helper";
+import { Accessed, Logger, Online_Set, Send_Message, User_Banned, Verify_User, Sleep } from "../helper";
 import { Censored_Activation_Pro } from "../other/censored";
 import { telegram, users_pk } from "../..";
 import { User_Pk_Get, User_Pk_Init } from "../other/pk_metr";
@@ -14,6 +14,7 @@ export async function Blank_Self(context: MessageContext) {
     await Online_Set(context)
     const blank_check = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
     const keyboard = new InlineKeyboardBuilder()
+    
     if (blank_check) { 
         // проверка таймстемпа на редактирование анкеты
         const datenow: any = new Date()
@@ -34,10 +35,12 @@ export async function Blank_Self(context: MessageContext) {
         keyboard.textButton({ text: '➕ Создать', payload: { cmd: 'blank_create' } })
     }
     keyboard.textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    
     let answer = ''
     if (!blank_check) {
         await Logger(`(blank config) ~ starting creation self <blank> for @${user_check.username}`)
         answer = `⚠ У вас еще нет анкеты, нажмите [➕ Создать]`
+        await Send_Message(context, `${answer}`, keyboard)
     } else {
         const blank = await prisma.blank.findFirst({ where: { id_account: user_check.id } })
         if (blank) {
@@ -49,11 +52,72 @@ export async function Blank_Self(context: MessageContext) {
             const count_unread = await prisma.mail.count({ where: { blank_to: blank.id, read: false }})
             const counter_warn = await prisma.report.count({ where: { id_blank: blank.id } })
             let censored = user_check.censored ? await Censored_Activation_Pro(blank.text) : blank.text
-            answer = `🛰️ Бланковый станок «Бюрократия-6000»\n\n📜 Анкета: ${blank.id}\n💬 Содержание:\n${censored}\n👁 Просмотров: ${count_vision}/${-1+count_max_vision}\n⚠ Предупреждений: ${counter_warn}/3\n✅ Принятых: ${count_success}\n🚫 Игноров: ${count_ignore}\n⌛ Ожидает: ${count_unread}\n❗ Потеряшек: ${count_wrong}`
+            
+            // Формируем основную информацию
+            const header = `🛰️ Бланковый станок «Бюрократия-6000»\n\n📜 Анкета: ${blank.id}\n👁 Просмотров: ${count_vision}/${-1+count_max_vision}\n⚠ Предупреждений: ${counter_warn}/3\n✅ Принятых: ${count_success}\n🚫 Игноров: ${count_ignore}\n⌛ Ожидает: ${count_unread}\n❗ Потеряшек: ${count_wrong}\n\n💬 Содержание:\n`
+            
+            // Проверяем общую длину
+            const fullText = header + censored;
+            
+            if (fullText.length <= 4096) {
+                // Если помещается в одно сообщение
+                await Send_Message(context, fullText, keyboard)
+            } else {
+                // Если не помещается - отправляем заголовок
+                await Send_Message(context, header)
+                
+                // Разбиваем содержание на части
+                const chunks = splitTextIntoChunks(censored, 4096);
+                
+                // Отправляем все части кроме последней без клавиатуры
+                for (let i = 0; i < chunks.length - 1; i++) {
+                    await Send_Message(context, chunks[i]);
+                    await Sleep(300);
+                }
+                
+                // Последнюю часть отправляем с клавиатурой
+                await Send_Message(context, chunks[chunks.length - 1], keyboard);
+            }
+            
             await Logger(`(blank config) ~ show self <blank> #${blank.id} for @${user_check.username}`)
         }
     }
-    await Send_Message(context, `${answer}`, keyboard)
+}
+
+// Вспомогательная функция для разбивки текста на части
+function splitTextIntoChunks(text: string, maxLength: number): string[] {
+    const chunks: string[] = [];
+    let currentChunk = '';
+    
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+        if ((currentChunk + line + '\n').length <= maxLength) {
+            currentChunk += line + '\n';
+        } else {
+            if (currentChunk.length > 0) {
+                chunks.push(currentChunk.trim());
+            }
+            currentChunk = line + '\n';
+            
+            // Если одна строка сама по себе превышает лимит
+            if (currentChunk.length > maxLength) {
+                // Разбиваем очень длинную строку на части
+                while (currentChunk.length > maxLength) {
+                    const part = currentChunk.substring(0, maxLength);
+                    chunks.push(part);
+                    currentChunk = currentChunk.substring(maxLength);
+                }
+            }
+        }
+    }
+    
+    // Добавляем последний кусок
+    if (currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+    }
+    
+    return chunks;
 }
 
 export async function Tag_Display_Settings(context: MessageContext, queryPayload: any) {
