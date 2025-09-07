@@ -6,6 +6,7 @@ import { Censored_Activation_Pro } from "./censored";
 import { User_Pk_Get, User_Pk_Init } from "./pk_metr";
 import { Blank } from "@prisma/client";
 import { keyboard_back, getTagsForBlank } from "../datacenter/tag";
+import { Browser_Research_Prefab_Input_Off, Browser_Report_Prefab_Input_Off, Browser_Like_Donation_Prefab_Input_Off} from "../reseacher/browser";
 
 export async function Input_Module(context: any) {
     // подготовка хранилища для модуля ввода пользователем
@@ -29,7 +30,10 @@ export async function Input_Module(context: any) {
         'blank_like_donation_prefab_input_off': Blank_Like_Donation_Prefab_Input_Off, // Рандом - лайк донатера с сообщением пользователю
         'sniper_research_prefab_input_off': Sniper_Research_Prefab_Input_Off, // Снайпер - Ввод номера анкеты
         'tagator_report_prefab_input_off': Tagator_Report_Prefab_Input_Off,
-        'tagator_like_donation_prefab_input_off': Tagator_Like_Donation_Prefab_Input_Off
+        'tagator_like_donation_prefab_input_off': Tagator_Like_Donation_Prefab_Input_Off,
+        "browser_research_prefab_input_off": Browser_Research_Prefab_Input_Off,
+        "browser_report_prefab_input_off": Browser_Report_Prefab_Input_Off,
+        "browser_like_donation_prefab_input_off": Browser_Like_Donation_Prefab_Input_Off
     };
     const command: string | any = users_pk[id].operation;
     if (typeof command != 'string') { return }

@@ -20,23 +20,46 @@ export async function Logger(text: String) {
     console.log(`[${project_name}] --> ${text} <-- (${new Date().toLocaleString("ru"/*, options*/)})`)
 }
 
-export async function Send_Message(message: MessageContext, text: string, keyboard?: any) {
+export async function Send_Message(message: MessageContext, text: string, keyboard?: any, options?: any) {
     text = text ? text : 'invalid message'
     try {
         await Sleep(500)
-        if (!keyboard) { await telegram.api.sendMessage({ chat_id: message.chat.id, text: `${text}` }); }
-        else { await telegram.api.sendMessage({ chat_id: message.chat.id, text: `${text}`, reply_markup: keyboard }); }
+        const messageOptions = {
+            chat_id: message.chat.id,
+            text: text,
+            parse_mode: options?.parse_mode,
+            ...options
+        };
+        
+        if (keyboard) {
+            messageOptions.reply_markup = keyboard;
+        }
+        
+        await telegram.api.sendMessage(messageOptions);
     } catch (e) {
         console.log(`Ошибка отправки сообщения: ${e}`)
     }
 }
 
-export async function Send_Message_NotSelf(id_target: number, text: string, keyboard?: any) {
+export async function Send_Message_NotSelf(id_target: number, text: string, keyboard?: any, options?: any) {
     text = text ? text : 'invalid message'
     try {
         await Sleep(500)
-        if (!keyboard) { await telegram.api.sendMessage({ chat_id: id_target, text: `${text}` }); }
-        else { await telegram.api.sendMessage({ chat_id: id_target, text: `${text}`, reply_markup: keyboard }); }
+        if (!keyboard) { 
+            await telegram.api.sendMessage({ 
+                chat_id: id_target, 
+                text: `${text}`,
+                ...options 
+            }); 
+        }
+        else { 
+            await telegram.api.sendMessage({ 
+                chat_id: id_target, 
+                text: `${text}`, 
+                reply_markup: keyboard,
+                ...options 
+            }); 
+        }
     } catch (e) {
         console.log(`Ошибка отправки сообщения: ${e}`)
     }
@@ -193,6 +216,7 @@ export async function Format_Text_With_Tags(
     const tagDisplayMode = (user_check as any).tag_display_mode || 'smart';
     const tagPosition = (user_check as any).tag_position || 'bottom';
     
+    // Для HTML не экранируем теги, просто соединяем
     const tagsText = tags.map((t: {name: string}) => `#${t.name}`).join(" ");
     const keyboard = new InlineKeyboardBuilder();
     
@@ -211,10 +235,9 @@ export async function Format_Text_With_Tags(
                 payload: { cmd: "show_tags", idb: blankId } 
             }).row();
         }
-        finalText = titlePart + '\n\n' + contentPart; // Убедимся, что теги не добавляются в текст
+        finalText = titlePart + '\n\n' + contentPart;
     } else {
         // Умное отображение
-        // Сначала заголовок, потом теги (если выбрана позиция сверху), потом содержание
         let textWithTags = titlePart;
         
         if (tagPosition === 'top' && tagsText) {
@@ -228,17 +251,14 @@ export async function Format_Text_With_Tags(
         const totalLength = textWithTags.length;
         
         if (totalLength <= 4096) {
-            // Помещается в одно сообщение
             finalText = textWithTags;
         } else {
-            // Не помещается - показываем кнопку
             if (tags.length > 0) {
                 keyboard.textButton({ 
                     text: "🏷 Показать теги", 
                     payload: { cmd: "show_tags", idb: blankId } 
                 }).row();
             }
-            // Оставляем только заголовок и содержание без тегов
             finalText = titlePart + '\n\n' + contentPart;
         }
     }

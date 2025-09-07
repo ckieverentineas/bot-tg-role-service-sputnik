@@ -34,6 +34,7 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     .textButton({ text: '⚙ Цензура', payload: { cmd: 'censored_change' } })
     .textButton({ text: '🌐 Тегатор', payload: { cmd: 'tagator_menu' } }).row()
     .textButton({ text: '🎲 Рандом', payload: { cmd: 'random_research' } })
+    .textButton({ text: '🧭 Браузер', payload: { cmd: 'browser_research' } }).row()
     .textButton({ text: '🚫 Каеф', payload: { cmd: 'exit_menu' } }).row()
     if (user_check.donate || await Accessed(context) != `user`) {
       keyboard.textButton({ text: '⚰ Архив', payload: { cmd: 'archive_research' } })
@@ -216,6 +217,94 @@ export function commandUserRoutes(hearManager: HearManager<MessageContext>): voi
     await Logger(`(private chat) ~ enter in main menu system is viewed by <user> №${context.senderId}`)
   })
   */
+
+hearManager.hear(/🧭 Браузер|!браузер|!Браузер/, async (context: any) => {
+    if (context.chat.id < 0) { return }
+    const user_check = await prisma.account.findFirst({ where: { idvk: context.chat.id } })
+    if (!user_check) { return }
+    await Online_Set(context)
+    
+    // Проверка подписки на канал
+    const isSubscribed = await checkSubscription(context.chat.id)
+    
+    if (!isSubscribed) {
+      const keyboard = new InlineKeyboardBuilder()
+        .urlButton({ text: '📢 Подписаться', url: 'https://t.me/sputnik_signal' })
+        .textButton({ text: '🔄 Проверить подписку', payload: { cmd: 'check_subscription_browser' } })
+      
+      return await Send_Message(context, `⚠ Для использования браузера необходимо подписаться на наш канал: @sputnik_signal`, keyboard)
+    }
+    
+    // Если подписка есть, показываем меню браузера
+    const keyboard = new InlineKeyboardBuilder()
+      .textButton({ text: '🧭 Запустить браузер', payload: { cmd: 'browser_research' } }).row()
+      .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+    
+    await Send_Message(context, `🧭 Браузер — поиск анкет по ключевым словам\n\nВведите промпт для поиска подходящих анкет`, keyboard)
+    await Logger(`(command center) ~ show browser menu for @${context.chat.id}`)
+})
+
+// Добавляем функцию проверки подписки
+async function checkSubscription(userId: number): Promise<boolean> {
+  try {
+    const member = await telegram.api.getChatMember({
+      chat_id: '@sputnik_signal',
+      user_id: userId
+    })
+
+    return member.status !== 'left' && member.status !== 'kicked'
+  } catch (error) {
+    console.error(`Ошибка при проверке подписки:`, error)
+    return false
+  }
+}
+
+hearManager.hear(/🔄 Проверить подписку|!проверитьподписку/i, async (context: any) => {
+    if (context.chat.id < 0) { return }
+    
+    const isSubscribed = await checkSubscription(context.chat.id)
+    
+    if (isSubscribed) {
+        // Показываем меню браузера
+        const keyboard = new InlineKeyboardBuilder()
+            .textButton({ text: '🧭 Запустить браузер', payload: { cmd: 'browser_research' } }).row()
+            .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+        
+        await Send_Message(context, `✅ Отлично! Вы подписаны на канал. Теперь можете использовать браузер.`, keyboard)
+        await Logger(`(command center) ~ subscription verified for @${context.chat.id}`)
+    } else {
+        // Показываем кнопку для подписки
+        const keyboard = new InlineKeyboardBuilder()
+            .urlButton({ text: '📢 Подписаться', url: 'https://t.me/sputnik_signal' })
+            .textButton({ text: '🔄 Проверить подписку', payload: { cmd: 'check_subscription_browser' } })
+        
+        await Send_Message(context, `❌ Вы все еще не подписаны на канал @sputnik_signal. Подпишитесь и попробуйте снова.`, keyboard)
+        await Logger(`(command center) ~ subscription check failed for @${context.chat.id}`)
+    }
+})
+
+// Также добавьте обработчик для callback query с проверкой подписки
+hearManager.hear(/check_subscription_browser/, async (context: any) => {
+    if (context.chat.id < 0) { return }
+    
+    const isSubscribed = await checkSubscription(context.chat.id)
+    
+    if (isSubscribed) {
+        const keyboard = new InlineKeyboardBuilder()
+            .textButton({ text: '🧭 Запустить браузер', payload: { cmd: 'browser_research' } }).row()
+            .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+        
+        await Send_Message(context, `✅ Отлично! Вы подписаны на канал. Теперь можете использовать браузер.`, keyboard)
+    } else {
+        const keyboard = new InlineKeyboardBuilder()
+            .urlButton({ text: '📢 Подписаться', url: 'https://t.me/sputnik_signal' })
+            .textButton({ text: '🔄 Проверить подписку', payload: { cmd: 'check_subscription_browser' } })
+        
+        await Send_Message(context, `❌ Вы все еще не подписаны на канал @sputnik_signal. Подпишитесь и попробуйте снова.`, keyboard)
+    }
+    
+    await Logger(`(command center) ~ subscription checked via callback for @${context.chat.id}: ${isSubscribed}`)
+})
 
   hearManager.hear(/!енотик/, async (context: MessageContext) => {
 		if (context.chat.id < 0) { return }

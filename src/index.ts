@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { Keyboard, KeyboardBuilder, Telegram } from 'puregram';
+import { Keyboard, KeyboardBuilder, Telegram, InlineKeyboardBuilder } from 'puregram';
 
 const { QuestionManager } = require('puregram-question');
 
@@ -23,7 +23,7 @@ import { List_Admin, List_Ban, List_Banhammer, List_Donate } from './module/acco
 import { Sniper_Research_Perfab_Input_ON, Show_Tags_Sniper, Sniper_Research_Show_Blank } from './module/reseacher/sniper';
 import { Tagator_Like, Tagator_Like_Donation_Perfab_Input_ON, Tagator_Menu, Tagator_Report, Tagator_Report_Perfab_Input_ON, Tagator_Research, Tagator_Research_Config_Like, Tagator_Research_Config_Reset, Tagator_Research_Config_Unlike, Tagator_Unlike, Show_Tags_Tagator, Tagator_Research_Show_Blank } from './module/reseacher/tagator';
 import { Bot } from './module/ai/speak';
-
+import { Browser_Research, Browser_Like, Browser_Unlike, Browser_Report, Browser_Report_Perfab_Input_ON, Browser_Like_Donation_Perfab_Input_ON, Show_Tags_Browser, Browser_Research_Show_Blank } from "./module/reseacher/browser";
 
 dotenv.config();
 
@@ -42,7 +42,30 @@ commandUserRoutes(hearManager)
 const bot = new Bot();
 
 // хранилище для пкметра и режимов
-export const users_pk: Array<{ idvk: number, text: string, mode: 'main' | 'pkmetr' | 'input', operation: string, id_target: number | null }> = []
+export const users_pk: Array<{ 
+    idvk: number, 
+    text: string, 
+    mode: 'main' | 'pkmetr' | 'input', 
+    operation: string, 
+    id_target: number | null, 
+    searchResults?: any[], 
+    searchQuery?: string, 
+    currentIndex?: number 
+}> = []
+
+async function checkSubscription(userId: number): Promise<boolean> {
+  try {
+    const member = await telegram.api.getChatMember({
+      chat_id: '@sputnik_signal',
+      user_id: userId
+    })
+
+    return member.status !== 'left' && member.status !== 'kicked'
+  } catch (error) {
+    console.error(`Ошибка при проверке подписки:`, error)
+    return false
+  }
+}
 
 telegram.updates.on('message', async (context: MessageContext) => {
     //console.log(context)
@@ -146,7 +169,33 @@ telegram.updates.on('callback_query', async (query: CallbackQueryContext) => {
         'tagator_report_ION': Tagator_Report_Perfab_Input_ON,
         'tagator_report': Tagator_Report,
         'tagator_like_don': Tagator_Like_Donation_Perfab_Input_ON,
-        'exit_menu': Exit_Menu
+        'exit_menu': Exit_Menu,
+
+        'browser_research': Browser_Research,
+        'browser_like': Browser_Like,
+        'browser_unlike': Browser_Unlike,
+        'browser_report': Browser_Report,
+        'browser_report_ION': Browser_Report_Perfab_Input_ON,
+        'browser_like_don': Browser_Like_Donation_Perfab_Input_ON,
+        'show_tags_browser': Show_Tags_Browser,
+        'browser_research_show_blank': Browser_Research_Show_Blank,
+        'check_subscription_browser': async (context: any) => {
+            const isSubscribed = await checkSubscription(context.chat.id)
+            
+            if (isSubscribed) {
+                const keyboard = new InlineKeyboardBuilder()
+                    .textButton({ text: '🧭 Запустить браузер', payload: { cmd: 'browser_research' } }).row()
+                    .textButton({ text: '🚫 Назад', payload: { cmd: 'main_menu' } })
+                
+                await Send_Message(context, `✅ Отлично! Вы подписаны на наш канал. Теперь можете использовать браузер.`, keyboard)
+            } else {
+                const keyboard = new InlineKeyboardBuilder()
+                    .urlButton({ text: '📢 Подписаться', url: 'https://t.me/sputnik_signal' })
+                    .textButton({ text: '🔄 Проверить подписку', payload: { cmd: 'check_subscription_browser' } })
+                
+                await Send_Message(context, `❌ Вы все еще не подписаны на наш канал @sputnik_signal. Подпишитесь и попробуйте снова.`, keyboard)
+            }
+        }
     };
     //console.log(query)
     const command: string | any = queryPayload.cmd;
@@ -172,6 +221,7 @@ const commands = [
     { command: '/help', description: 'help menu' },
     { command: '/pkmetr', description: 'pkmetr menu' },
     { command: '/keyboard', description: 'get call buttons' },
+    { command: '/browser', description: 'browser search' },
 ];
 
 try {
