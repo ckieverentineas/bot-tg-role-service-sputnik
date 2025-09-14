@@ -16,11 +16,16 @@
     "@puregram/hear": "^2.1.0-rc.1",
     "@types/node": "^20.14.12",
     "dotenv": "^16.4.5",
+    "natural": "^8.1.0",
     "prisma": "^5.22.0",
     "puregram": "^2.26.8",
     "puregram-question": "^1.0.4",
+    "string-similarity": "^4.0.4",
     "telegraf": "^4.16.3",
-    "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@types/string-similarity": "^4.0.2",
+    "ts-node-dev": "^2.0.0"
   }
 }
